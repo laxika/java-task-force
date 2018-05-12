@@ -3,13 +3,12 @@ package com.morethanheroic.taskforce.job;
 import com.morethanheroic.taskforce.task.AsyncTask;
 import com.morethanheroic.taskforce.task.Task;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class JobExecutor {
 
@@ -24,17 +23,36 @@ public class JobExecutor {
             }
         }
 
+        final AtomicInteger atomicInteger = new AtomicInteger();
 
-        Optional<?> optional = job.getGenerator().generate();
+        boolean shouldRun = true;
+        while (shouldRun) {
+            Optional<?> optional = job.getGenerator().generate();
 
-        while (optional.isPresent()) {
+            if (!optional.isPresent()) {
+                shouldRun = false;
+                continue;
+            }
+
+            atomicInteger.incrementAndGet();
+
             CompletableFuture completableFuture = CompletableFuture.supplyAsync(() -> optional.get());
 
             for (Task task : job.getTasks()) {
                 completableFuture = completableFuture.thenApplyAsync((xyz) -> task.execute(xyz), executorServiceHashMap.get(System.identityHashCode(task)));
             }
 
-            completableFuture.thenAccept((asd) -> job.getSink().consume(asd));
+            completableFuture = completableFuture.thenAccept((asd) -> job.getSink().consume(asd));
+            completableFuture.thenAccept((asd)->atomicInteger.decrementAndGet());
+        }
+
+        //Block until everything finish
+        while(atomicInteger.get() != 0) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
