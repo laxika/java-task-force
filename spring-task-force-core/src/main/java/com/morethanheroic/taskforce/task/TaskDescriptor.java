@@ -8,5 +8,5 @@ import lombok.Getter;
 public class TaskDescriptor {
 
     private final int parallelismLevel;
-    private final Task task;
+    private final Task<Object, Object> task;
 }

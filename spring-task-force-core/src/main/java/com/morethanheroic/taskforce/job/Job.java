@@ -2,7 +2,7 @@ package com.morethanheroic.taskforce.job;
 
 import com.morethanheroic.taskforce.generator.Generator;
 import com.morethanheroic.taskforce.sink.Sink;
-import com.morethanheroic.taskforce.task.Task;
+import com.morethanheroic.taskforce.task.TaskDescriptor;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ public interface Job {
 
     Generator getGenerator();
 
-    Sink getSink();
+    Sink<Object> getSink();
 
-    List<Task> getTasks();
+    List<TaskDescriptor> getTasks();
 }

@@ -1,12 +1,8 @@
 package com.morethanheroic.taskforce.sample.domain;
 
-import com.morethanheroic.taskforce.task.AsyncTask;
+import com.morethanheroic.taskforce.task.Task;
 
-public class SlowSampleTask extends AsyncTask<String, String> {
-
-    public SlowSampleTask() {
-        super(10);
-    }
+public class SlowSampleTask implements Task<String,String> {
 
     @Override
     public String execute(String s) {
