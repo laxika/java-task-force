@@ -32,6 +32,8 @@ subprojects {
             exclude(module: 'commons-logging')
         }
 
+        compile group: 'com.google.guava', name: 'guava', version: '19.0'
+
         compile(group: 'org.springframework.boot', name: 'spring-boot-starter-test')
     }
 }

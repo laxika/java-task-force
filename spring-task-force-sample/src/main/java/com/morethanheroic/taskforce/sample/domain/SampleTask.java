@@ -6,6 +6,6 @@ public class SampleTask implements Task<String, String> {
 
     @Override
     public String execute(String s) {
-        return null;
+        return s.toUpperCase();
     }
 }
