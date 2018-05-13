@@ -6,9 +6,7 @@ import com.morethanheroic.taskforce.task.TaskDescriptor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class JobExecutor {
@@ -17,16 +15,20 @@ public class JobExecutor {
         final Map<Integer, ExecutorService> executorServiceHashMap = new HashMap<>();
 
         for (TaskDescriptor taskDescriptor : job.getTasks()) {
-            final Task task = taskDescriptor.getTask();
-            final int parallelismLevel = taskDescriptor.getParallelismLevel();
+            final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+                    taskDescriptor.getParallelismLevel(),
+                    taskDescriptor.getParallelismLevel(),
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(taskDescriptor.getMaxQueueSize()),
+                    Executors.defaultThreadFactory(),
+                    new ThreadPoolExecutor.CallerRunsPolicy()
+            );
 
-            if (parallelismLevel == 1) {
-                executorServiceHashMap.put(System.identityHashCode(task), Executors.newSingleThreadExecutor());
-            } else {
-                executorServiceHashMap.put(System.identityHashCode(task),
-                        Executors.newFixedThreadPool(parallelismLevel));
-            }
+            executorServiceHashMap.put(System.identityHashCode(taskDescriptor.getTask()), threadPoolExecutor);
         }
+
+        final Executor generatorExecutor = Executors.newSingleThreadExecutor();
+        final Executor sinkExecutor = Executors.newSingleThreadExecutor();
 
         final AtomicInteger atomicInteger = new AtomicInteger();
 
@@ -41,14 +43,14 @@ public class JobExecutor {
 
             atomicInteger.incrementAndGet();
 
-            CompletableFuture<Object> completableFuture = CompletableFuture.supplyAsync(optional::get);
+            CompletableFuture<Object> completableFuture = CompletableFuture.supplyAsync(optional::get, generatorExecutor);
 
             for (TaskDescriptor taskDescriptor : job.getTasks()) {
                 completableFuture = completableFuture.thenApplyAsync((xyz) -> taskDescriptor.getTask().execute(xyz),
                         executorServiceHashMap.get(System.identityHashCode(taskDescriptor.getTask())));
             }
 
-            final CompletableFuture<Void> closingFuture = completableFuture.thenAccept((asd) -> job.getSink().consume(asd));
+            final CompletableFuture<Void> closingFuture = completableFuture.thenAcceptAsync((asd) -> job.getSink().consume(asd), sinkExecutor);
             closingFuture.thenAccept((asd) -> atomicInteger.decrementAndGet());
         }
 

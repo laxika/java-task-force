@@ -31,6 +31,7 @@ public class JobTaskPhaseBuilder {
         tasks.add(
                 TaskDescriptor.builder()
                         .parallelismLevel(1)
+                        .maxQueueSize(10000)
                         .task(task)
                         .build()
         );
@@ -50,6 +51,30 @@ public class JobTaskPhaseBuilder {
         tasks.add(
                 TaskDescriptor.builder()
                         .parallelismLevel(parallelismLevel)
+                        .maxQueueSize(10000)
+                        .task(task)
+                        .build()
+        );
+
+        return this;
+    }
+
+    /**
+     * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be run with the provided
+     * level of parallelism in it's own thread pool. The size of the queue that holds the data in the thread pool can
+     * also be set. When the generator or the task above create more entries that alloved by the queue it will be
+     * blocked.
+     *
+     * @param task             the task to add
+     * @param parallelismLevel the parallelism level of the task
+     * @param maxQueueSize     the maximum queue size of the queue in the thread pool
+     * @return this builder
+     */
+    public JobTaskPhaseBuilder asyncTask(final Task task, final int parallelismLevel, final int maxQueueSize) {
+        tasks.add(
+                TaskDescriptor.builder()
+                        .parallelismLevel(parallelismLevel)
+                        .maxQueueSize(maxQueueSize)
                         .task(task)
                         .build()
         );

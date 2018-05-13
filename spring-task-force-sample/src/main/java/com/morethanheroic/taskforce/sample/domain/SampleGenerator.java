@@ -1,9 +1,11 @@
 package com.morethanheroic.taskforce.sample.domain;
 
 import com.morethanheroic.taskforce.generator.Generator;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
 
+@Slf4j
 public class SampleGenerator implements Generator {
 
     private int value = 0;
@@ -12,7 +14,9 @@ public class SampleGenerator implements Generator {
     public Optional<String> generate() {
         value++;
 
-        if (value < 100) {
+        if (value < 50) {
+            log.info("Adding value: " + value + " to the working set.");
+
             return Optional.of(String.valueOf(value));
         }
 

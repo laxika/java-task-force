@@ -11,7 +11,7 @@ public class AsyncTaskSample {
     public Job buildJob() {
         return JobBuilder.newBuilder()
                 .generator(new SampleGenerator())
-                .asyncTask(new SlowSampleTask(), 10)
+                .asyncTask(new SlowSampleTask(), 10, 5)
                 .sink(new SampleSink())
                 .build();
     }
