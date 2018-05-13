@@ -1,12 +1,12 @@
 package com.morethanheroic.taskforce.job;
 
-import com.morethanheroic.taskforce.task.Task;
 import com.morethanheroic.taskforce.task.TaskDescriptor;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class JobExecutor {
@@ -31,19 +31,23 @@ public class JobExecutor {
         final Executor sinkExecutor = Executors.newSingleThreadExecutor();
 
         final AtomicInteger atomicInteger = new AtomicInteger();
+        final AtomicBoolean calculator = new AtomicBoolean(true);
 
-        boolean shouldRun = true;
-        while (shouldRun) {
-            Optional<?> optional = job.getGenerator().generate();
+        while (calculator.get()) {
+            CompletableFuture<Object> completableFuture = CompletableFuture.supplyAsync(() -> {
+                final Optional<?> generationResult = job.getGenerator().generate();
 
-            if (!optional.isPresent()) {
-                shouldRun = false;
-                continue;
-            }
+                if (!generationResult.isPresent()) {
+                    calculator.set(false);
 
-            atomicInteger.incrementAndGet();
+                    throw new RuntimeException();
+                }
 
-            CompletableFuture<Object> completableFuture = CompletableFuture.supplyAsync(optional::get, generatorExecutor);
+                //Increment the shutdown counter
+                atomicInteger.incrementAndGet();
+
+                return generationResult.get();
+            }, generatorExecutor);
 
             for (TaskDescriptor taskDescriptor : job.getTasks()) {
                 completableFuture = completableFuture.thenApplyAsync((xyz) -> taskDescriptor.getTask().execute(xyz),

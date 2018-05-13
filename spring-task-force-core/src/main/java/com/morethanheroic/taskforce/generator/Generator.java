@@ -15,5 +15,5 @@ public interface Generator {
      *
      * @return an items to be processed by the registered tasks
      */
-    Optional<String> generate();
+    Optional<?> generate();
 }
