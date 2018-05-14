@@ -82,7 +82,7 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
      * @param sink the sink to add
      * @return the builder for the third step of job creation
      */
-    public JobFinalPhaseBuilder sink(final Sink sink) {
+    public JobFinalPhaseBuilder sink(final Sink<NEXT_INPUT> sink) {
         return new JobFinalPhaseBuilder(
                 TaskStageJobContext.builder()
                         .generator(jobContext.getGenerator())
