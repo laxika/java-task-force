@@ -18,7 +18,7 @@ import java.util.List;
 public class JobTaskPhaseBuilder<NEXT_INPUT> {
 
     private final GeneratorStageJobContext jobContext;
-    private final List<TaskDescriptor> tasks = new ArrayList<>();
+    private final List<TaskDescriptor<?, ?>> tasks = new ArrayList<>();
 
     /**
      * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be run with parallelism

@@ -17,5 +17,5 @@ public class TaskStageJobContext {
 
     private final Generator generator;
     private final Sink sink;
-    private final List<TaskDescriptor> tasks;
+    private final List<TaskDescriptor<?, ?>> tasks;
 }
