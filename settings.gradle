@@ -1,4 +1,4 @@
-rootProject.name = 'spring-task-force'
-include 'spring-task-force-core'
-include 'spring-task-force-sample'
+rootProject.name = 'java-task-force'
+include 'java-task-force-core'
+include 'java-task-force-sample'
 
