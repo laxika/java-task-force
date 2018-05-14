@@ -1,6 +1,6 @@
 package com.morethanheroic.taskforce.sample.jobbuilder;
 
-import com.morethanheroic.taskforce.job.JobExecutor;
+import com.morethanheroic.taskforce.executor.JobExecutor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

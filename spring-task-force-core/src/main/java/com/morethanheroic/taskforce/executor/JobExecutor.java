@@ -1,5 +1,6 @@
-package com.morethanheroic.taskforce.job;
+package com.morethanheroic.taskforce.executor;
 
+import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.task.TaskDescriptor;
 
 import java.util.HashMap;
