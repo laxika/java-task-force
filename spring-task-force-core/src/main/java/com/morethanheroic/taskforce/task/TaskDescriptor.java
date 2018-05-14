@@ -7,7 +7,7 @@ import lombok.Getter;
 @Builder
 public class TaskDescriptor<INPUT, OUTPUT> {
 
+    private final Task<INPUT, OUTPUT> task;
     private final int parallelismLevel;
     private final int maxQueueSize;
-    private final Task<INPUT, OUTPUT> task;
 }
