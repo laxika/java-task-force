@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SimpleJob implements Job {
 
-  private final Generator generator;
-  private final List<TaskDescriptor> tasks;
-  private final Sink sink;
+    private final Generator generator;
+    private final List<TaskDescriptor<?, ?>> tasks;
+    private final Sink sink;
 }

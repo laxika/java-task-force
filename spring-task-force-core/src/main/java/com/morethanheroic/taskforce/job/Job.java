@@ -12,5 +12,5 @@ public interface Job {
 
     Sink<Object> getSink();
 
-    List<TaskDescriptor> getTasks();
+    List<TaskDescriptor<?, ?>> getTasks();
 }

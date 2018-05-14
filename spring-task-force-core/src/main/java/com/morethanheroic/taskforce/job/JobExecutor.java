@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class JobExecutor {
 
@@ -30,41 +29,36 @@ public class JobExecutor {
         final Executor generatorExecutor = Executors.newSingleThreadExecutor();
         final Executor sinkExecutor = Executors.newSingleThreadExecutor();
 
-        final AtomicInteger atomicInteger = new AtomicInteger();
         final AtomicBoolean calculator = new AtomicBoolean(true);
 
         while (calculator.get()) {
-            CompletableFuture<Object> completableFuture = CompletableFuture.supplyAsync(() -> {
+            CompletableFuture<Optional<?>> completableFuture = CompletableFuture.supplyAsync(() -> {
                 final Optional<?> generationResult = job.getGenerator().generate();
 
                 if (!generationResult.isPresent()) {
                     calculator.set(false);
-
-                    throw new RuntimeException();
                 }
 
-                //Increment the shutdown counter
-                atomicInteger.incrementAndGet();
-
-                return generationResult.get();
+                return generationResult;
             }, generatorExecutor);
 
             for (TaskDescriptor taskDescriptor : job.getTasks()) {
-                completableFuture = completableFuture.thenApplyAsync((xyz) -> taskDescriptor.getTask().execute(xyz),
+                completableFuture = completableFuture.thenApplyAsync(
+                        (workingItem) -> {
+                            if (!workingItem.isPresent()) {
+                                return Optional.empty();
+                            }
+
+                            return taskDescriptor.getTask().execute( workingItem.get());
+                        },
                         executorServiceHashMap.get(System.identityHashCode(taskDescriptor.getTask())));
             }
 
-            final CompletableFuture<Void> closingFuture = completableFuture.thenAcceptAsync((asd) -> job.getSink().consume(asd), sinkExecutor);
-            closingFuture.thenAccept((asd) -> atomicInteger.decrementAndGet());
-        }
-
-        //Block until everything finish
-        while (atomicInteger.get() != 0) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            completableFuture.thenAcceptAsync((asd) -> {
+                if (asd.isPresent()) {
+                    job.getSink().consume(asd);
+                }
+            }, sinkExecutor);
         }
     }
 }
