@@ -5,7 +5,7 @@ import java.util.Optional;
 /**
  * The generator is responsible for providing entries to process to the {@link com.morethanheroic.taskforce.task.Task}s.
  */
-public interface Generator {
+public interface Generator<RESULT> {
 
     /**
      * Provides new objects to be processed by the registered {@link com.morethanheroic.taskforce.task.Task}s is a
@@ -15,5 +15,5 @@ public interface Generator {
      *
      * @return an items to be processed by the registered tasks
      */
-    Optional<?> generate();
+    Optional<RESULT> generate();
 }

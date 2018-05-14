@@ -15,7 +15,7 @@ import java.util.List;
  * new tasks to the processing pipeline and close the whole job with a {@link Sink}.
  */
 @RequiredArgsConstructor
-public class JobTaskPhaseBuilder {
+public class JobTaskPhaseBuilder<NEXT_INPUT> {
 
     private final GeneratorStageJobContext jobContext;
     private final List<TaskDescriptor> tasks = new ArrayList<>();
@@ -27,16 +27,16 @@ public class JobTaskPhaseBuilder {
      * @param task the task to add
      * @return this builder
      */
-    public JobTaskPhaseBuilder task(final Task task) {
+    public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final Task<NEXT_INPUT, OUTPUT> task) {
         tasks.add(
-                TaskDescriptor.builder()
+                TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
                         .parallelismLevel(1)
                         .maxQueueSize(10000)
                         .task(task)
                         .build()
         );
 
-        return this;
+        return (JobTaskPhaseBuilder<OUTPUT>) this;
     }
 
     /**
@@ -47,16 +47,10 @@ public class JobTaskPhaseBuilder {
      * @param parallelismLevel the parallelism level of the task
      * @return this builder
      */
-    public JobTaskPhaseBuilder asyncTask(final Task task, final int parallelismLevel) {
-        tasks.add(
-                TaskDescriptor.builder()
-                        .parallelismLevel(parallelismLevel)
-                        .maxQueueSize(10000)
-                        .task(task)
-                        .build()
-        );
+    public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final Task<NEXT_INPUT, OUTPUT> task, final int parallelismLevel) {
+        asyncTask(task, parallelismLevel, 10000);
 
-        return this;
+        return (JobTaskPhaseBuilder<OUTPUT>) this;
     }
 
     /**
@@ -70,16 +64,16 @@ public class JobTaskPhaseBuilder {
      * @param maxQueueSize     the maximum queue size of the queue in the thread pool
      * @return this builder
      */
-    public JobTaskPhaseBuilder asyncTask(final Task task, final int parallelismLevel, final int maxQueueSize) {
+    public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final Task<NEXT_INPUT, OUTPUT> task, final int parallelismLevel, final int maxQueueSize) {
         tasks.add(
-                TaskDescriptor.builder()
+                TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
                         .parallelismLevel(parallelismLevel)
                         .maxQueueSize(maxQueueSize)
                         .task(task)
                         .build()
         );
 
-        return this;
+        return (JobTaskPhaseBuilder<OUTPUT>) this;
     }
 
     /**

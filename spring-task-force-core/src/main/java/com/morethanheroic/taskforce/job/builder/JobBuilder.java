@@ -28,8 +28,8 @@ public class JobBuilder {
      * @param generator the generator to add to the job
      * @return the second phase of the building of a job
      */
-    public JobTaskPhaseBuilder generator(final Generator generator) {
-        return new JobTaskPhaseBuilder(
+    public <RESULT> JobTaskPhaseBuilder<RESULT> generator(final Generator<RESULT> generator) {
+        return new JobTaskPhaseBuilder<>(
                 GeneratorStageJobContext.builder()
                         .generator(generator)
                         .build()
