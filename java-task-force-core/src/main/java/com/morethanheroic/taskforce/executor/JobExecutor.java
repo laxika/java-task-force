@@ -46,11 +46,8 @@ public class JobExecutor {
                         threadPoolCache.getExecutor(taskDescriptor.getTask()));
             }
 
-            completableFuture.thenAcceptAsync((asd) -> {
-                if (asd.isPresent()) {
-                    job.getSink().consume(asd);
-                }
-            }, sinkExecutor);
+            completableFuture.thenAcceptAsync((workItem) ->
+                    workItem.ifPresent(o -> job.getSink().consume(o)), sinkExecutor);
         }
     }
 }
