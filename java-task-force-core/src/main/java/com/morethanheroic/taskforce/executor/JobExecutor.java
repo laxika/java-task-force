@@ -37,6 +37,7 @@ public class JobExecutor {
             for (TaskDescriptor taskDescriptor : job.getTaskDescriptors()) {
                 completableFuture = completableFuture.thenApplyAsync(
                         (workingItem) -> {
+                            //Skip empty working items
                             if (!workingItem.isPresent()) {
                                 return Optional.empty();
                             }
