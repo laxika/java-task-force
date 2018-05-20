@@ -27,6 +27,7 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
      * @param taskDescriptor the task descriptor that contains the task
      * @return this builder
      */
+    @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final TaskDescriptor<NEXT_INPUT, OUTPUT> taskDescriptor) {
         tasks.add(taskDescriptor);
 
@@ -40,10 +41,9 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
      * @param task the task to add
      * @return this builder
      */
+    @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final Task<NEXT_INPUT, OUTPUT> task) {
-        asyncTask(task, 1);
-
-        return (JobTaskPhaseBuilder<OUTPUT>) this;
+        return asyncTask(task, 1);
     }
 
     /**
@@ -54,10 +54,9 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
      * @param parallelismLevel the parallelism level of the task
      * @return this builder
      */
+    @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final Task<NEXT_INPUT, OUTPUT> task, final int parallelismLevel) {
-        asyncTask(task, parallelismLevel, 10000);
-
-        return (JobTaskPhaseBuilder<OUTPUT>) this;
+        return asyncTask(task, parallelismLevel, 10000);
     }
 
     /**
@@ -71,6 +70,7 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
      * @param maxQueueSize     the maximum queue size of the queue in the thread pool
      * @return this builder
      */
+    @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final Task<NEXT_INPUT, OUTPUT> task, final int parallelismLevel, final int maxQueueSize) {
         tasks.add(
                 TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
