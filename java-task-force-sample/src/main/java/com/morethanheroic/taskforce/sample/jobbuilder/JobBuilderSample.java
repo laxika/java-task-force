@@ -11,8 +11,8 @@ public class JobBuilderSample {
     public Job buildJob() {
         return JobBuilder.newBuilder()
                 .generator(new SampleGenerator())
-                .task(new SampleTask())
-                .task(new SampleTask())
+                .task("First Task", new SampleTask())
+                .task("Test Task",new SampleTask())
                 .sink(new SampleSink())
                 .build();
     }

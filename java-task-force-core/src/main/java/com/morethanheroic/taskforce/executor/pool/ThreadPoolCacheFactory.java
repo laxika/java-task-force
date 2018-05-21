@@ -1,6 +1,6 @@
 package com.morethanheroic.taskforce.executor.pool;
 
-import com.morethanheroic.taskforce.task.TaskDescriptor;
+import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.concurrent.*;
 
 /**
  * This class is responsible for creating pre-initialized {@link ThreadPoolCache} instances based on the provided
- * {@link com.morethanheroic.taskforce.task.TaskDescriptor} data.
+ * {@link TaskDescriptor} data.
  */
 public class ThreadPoolCacheFactory {
 

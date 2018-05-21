@@ -2,7 +2,7 @@ package com.morethanheroic.taskforce.job;
 
 import com.morethanheroic.taskforce.generator.Generator;
 import com.morethanheroic.taskforce.sink.Sink;
-import com.morethanheroic.taskforce.task.TaskDescriptor;
+import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
 
 import java.util.List;
 

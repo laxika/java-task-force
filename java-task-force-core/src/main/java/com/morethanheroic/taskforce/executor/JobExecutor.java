@@ -3,7 +3,7 @@ package com.morethanheroic.taskforce.executor;
 import com.morethanheroic.taskforce.executor.pool.ThreadPoolCache;
 import com.morethanheroic.taskforce.executor.pool.ThreadPoolCacheFactory;
 import com.morethanheroic.taskforce.job.Job;
-import com.morethanheroic.taskforce.task.TaskDescriptor;
+import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -42,7 +42,7 @@ public class JobExecutor {
                                 return Optional.empty();
                             }
 
-                            return taskDescriptor.getTask().execute( workingItem.get());
+                            return taskDescriptor.getTask().execute(workingItem.get());
                         },
                         threadPoolCache.getExecutor(taskDescriptor.getTask()));
             }

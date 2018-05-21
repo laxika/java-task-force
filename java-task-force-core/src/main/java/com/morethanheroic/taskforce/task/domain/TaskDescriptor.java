@@ -1,5 +1,6 @@
-package com.morethanheroic.taskforce.task;
+package com.morethanheroic.taskforce.task.domain;
 
+import com.morethanheroic.taskforce.task.Task;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -29,4 +30,9 @@ public class TaskDescriptor<INPUT, OUTPUT> {
      * {@link OutOfMemoryError}s. It should be 0 or a higher than 0 positive integer.
      */
     private final int maxQueueSize;
+
+    /**
+     * The name of the task that this descriptor describe.
+     */
+    private final String taskName;
 }
