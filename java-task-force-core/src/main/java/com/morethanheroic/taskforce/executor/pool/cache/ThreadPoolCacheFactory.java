@@ -1,5 +1,6 @@
-package com.morethanheroic.taskforce.executor.pool;
+package com.morethanheroic.taskforce.executor.pool.cache;
 
+import com.morethanheroic.taskforce.executor.pool.BlockingThreadPoolExecutor;
 import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
 
 import java.util.Collections;
@@ -14,6 +15,8 @@ import java.util.concurrent.*;
  */
 public class ThreadPoolCacheFactory {
 
+    private static final int DEFAULT_KEEP_ALIVE_TIME = 0;
+
     /**
      * Creates a new {@link ThreadPoolCache} that will contain the {@link Executor}s for the task provided.
      *
@@ -24,13 +27,14 @@ public class ThreadPoolCacheFactory {
         final Map<Integer, ExecutorService> executorServiceHashMap = new HashMap<>();
 
         for (final TaskDescriptor<?, ?> taskDescriptor : taskDescriptors) {
-            final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+            final ThreadPoolExecutor threadPoolExecutor = new BlockingThreadPoolExecutor(
                     taskDescriptor.getParallelismLevel(),
                     taskDescriptor.getParallelismLevel(),
-                    0L, TimeUnit.MILLISECONDS,
-                    new LinkedBlockingQueue<>(taskDescriptor.getMaxQueueSize()),
+                    DEFAULT_KEEP_ALIVE_TIME,
+                    TimeUnit.MILLISECONDS,
+                    taskDescriptor.getMaxQueueSize(),
                     Executors.defaultThreadFactory(),
-                    new ThreadPoolExecutor.CallerRunsPolicy()
+                    new ThreadPoolExecutor.AbortPolicy()
             );
 
             executorServiceHashMap.put(System.identityHashCode(taskDescriptor.getTask()), threadPoolExecutor);

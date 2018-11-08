@@ -1,7 +1,7 @@
 package com.morethanheroic.taskforce.executor;
 
-import com.morethanheroic.taskforce.executor.pool.ThreadPoolCache;
-import com.morethanheroic.taskforce.executor.pool.ThreadPoolCacheFactory;
+import com.morethanheroic.taskforce.executor.pool.cache.ThreadPoolCache;
+import com.morethanheroic.taskforce.executor.pool.cache.ThreadPoolCacheFactory;
 import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
 

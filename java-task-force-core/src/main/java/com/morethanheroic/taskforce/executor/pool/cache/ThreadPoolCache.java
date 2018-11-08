@@ -1,4 +1,4 @@
-package com.morethanheroic.taskforce.executor.pool;
+package com.morethanheroic.taskforce.executor.pool.cache;
 
 import com.morethanheroic.taskforce.task.Task;
 import lombok.RequiredArgsConstructor;
