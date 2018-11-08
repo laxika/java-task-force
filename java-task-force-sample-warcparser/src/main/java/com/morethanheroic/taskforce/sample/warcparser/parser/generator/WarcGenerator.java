@@ -14,6 +14,12 @@ import org.jsoup.nodes.Document;
 import java.io.IOException;
 import java.util.Optional;
 
+/**
+ * This generator is creating JSoup {@link Document} instances form the responses found in a WARC file. Splitting the
+ * {@link WarcRecord} creation, the filtering of the valid records and the document building from a record is tempting
+ * but impossible to do without creating a context object because the whole record should be read immediately (and
+ * synchronously).
+ */
 @Slf4j
 @RequiredArgsConstructor
 public class WarcGenerator implements Generator<Document> {

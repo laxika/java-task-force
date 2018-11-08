@@ -9,10 +9,11 @@ import com.morethanheroic.taskforce.executor.JobExecutor;
 import com.morethanheroic.taskforce.executor.domain.JobExecutionContext;
 import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.job.builder.JobBuilder;
-import com.morethanheroic.taskforce.sample.warcparser.parser.WarcSink;
-import com.morethanheroic.taskforce.sample.warcparser.parser.WarcUrlParserTask;
+import com.morethanheroic.taskforce.sample.warcparser.parser.task.UrlProtocolFilter;
+import com.morethanheroic.taskforce.sample.warcparser.parser.task.WarcUrlParserTask;
 import com.morethanheroic.taskforce.sample.warcparser.parser.generator.WarcGenerator;
 import com.morethanheroic.taskforce.sample.warcparser.stream.AvailableInputStream;
+import com.morethanheroic.taskforce.sink.LoggingSink;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -33,7 +34,8 @@ public class WarcParserApplication {
         final Job parserJob = JobBuilder.newBuilder()
                 .generator(new WarcGenerator(warcReader))
                 .asyncTask(new WarcUrlParserTask(), 30, 1000)
-                .sink(new WarcSink())
+                .task(new UrlProtocolFilter("mailto"))
+                .sink(LoggingSink.of("Logged url: {}"))
                 .build();
 
         final JobExecutor jobExecutor = new JobExecutor();
