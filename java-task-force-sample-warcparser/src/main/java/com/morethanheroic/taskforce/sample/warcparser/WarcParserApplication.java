@@ -29,7 +29,7 @@ public class WarcParserApplication {
 
         final Job parserJob = JobBuilder.newBuilder()
                 .generator(new WarcGenerator(warcReader))
-                .asyncTask(new WarcTypeFilterTask(WarcRecord.WarcType.response), 1, 300)
+                .asyncTask(new WarcTypeFilterTask(WarcRecord.WarcType.response), 10, 300)
                 .sink(new WarcSink())
                 .build();
 
