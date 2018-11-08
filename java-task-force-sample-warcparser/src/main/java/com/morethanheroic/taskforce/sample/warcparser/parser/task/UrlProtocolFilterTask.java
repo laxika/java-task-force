@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class UrlProtocolFilter implements Task<List<URL>, List<URL>> {
+public class UrlProtocolFilterTask implements Task<List<URL>, List<URL>> {
 
     private final List<String> allowedProtocols;
 
-    public UrlProtocolFilter(final String... allowedProtocols) {
+    public UrlProtocolFilterTask(final String... allowedProtocols) {
         this.allowedProtocols = Arrays.asList(allowedProtocols);
     }
 
