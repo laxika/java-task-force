@@ -1,4 +1,4 @@
 rootProject.name = 'java-task-force'
 include 'java-task-force-core'
-include 'java-task-force-sample'
-
+include 'java-task-force-sample-basic'
+include 'java-task-force-sample-warcparser'
