@@ -1,9 +1,11 @@
 package com.morethanheroic.taskforce.executor;
 
+import com.morethanheroic.taskforce.executor.domain.JobExecutionContext;
 import com.morethanheroic.taskforce.executor.pool.cache.ThreadPoolCache;
 import com.morethanheroic.taskforce.executor.pool.cache.ThreadPoolCacheFactory;
 import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -12,13 +14,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@Slf4j
 public class JobExecutor {
 
     private final ThreadPoolCacheFactory threadPoolCacheFactory = new ThreadPoolCacheFactory();
-    private final Semaphore semaphore = new Semaphore(1000);
 
-    public void execute(final Job job) {
+    public void execute(final JobExecutionContext jobExecutionContext, final Job job) {
         final ThreadPoolCache threadPoolCache = threadPoolCacheFactory.newThreadPoolCache(job.getTaskDescriptors());
+
+        final Semaphore semaphore = new Semaphore(jobExecutionContext.getPreparedTaskCount());
 
         final Executor generatorExecutor = Executors.newSingleThreadExecutor();
         final Executor sinkExecutor = Executors.newSingleThreadExecutor();
@@ -68,6 +72,8 @@ public class JobExecutor {
             }, sinkExecutor);
 
             completableFuture.exceptionally((e) -> {
+                log.error("Error while executing a job!", e);
+
                 semaphore.release();
 
                 return Optional.empty();

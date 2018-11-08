@@ -5,14 +5,16 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.S3Object;
 import com.mixnode.warcreader.WarcReader;
-import com.mixnode.warcreader.record.WarcRecord;
 import com.morethanheroic.taskforce.executor.JobExecutor;
+import com.morethanheroic.taskforce.executor.domain.JobExecutionContext;
 import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.job.builder.JobBuilder;
-import com.morethanheroic.taskforce.sample.warcparser.parser.WarcGenerator;
 import com.morethanheroic.taskforce.sample.warcparser.parser.WarcSink;
-import com.morethanheroic.taskforce.sample.warcparser.parser.WarcTypeFilterTask;
+import com.morethanheroic.taskforce.sample.warcparser.parser.WarcUrlParserTask;
+import com.morethanheroic.taskforce.sample.warcparser.parser.generator.WarcGenerator;
+import com.morethanheroic.taskforce.sample.warcparser.stream.AvailableInputStream;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 
 public class WarcParserApplication {
@@ -23,17 +25,23 @@ public class WarcParserApplication {
                 .build();
 
         final S3Object s3Object = amazonS3.getObject("commoncrawl",
-                "crawl-data/CC-MAIN-2018-43/segments/1539583508988.18/warc/CC-MAIN-20181015080248-20181015101748-00000.warc.gz");
+                "crawl-data/CC-MAIN-2018-39/segments/1537267155413.17/warc/CC-MAIN-20180918130631-20180918150631-00009.warc.gz");
 
-        WarcReader warcReader = new WarcReader(s3Object.getObjectContent());
+        final WarcReader warcReader = new WarcReader(new AvailableInputStream(
+                new BufferedInputStream(s3Object.getObjectContent(), 1048576)));
 
         final Job parserJob = JobBuilder.newBuilder()
                 .generator(new WarcGenerator(warcReader))
-                .asyncTask(new WarcTypeFilterTask(WarcRecord.WarcType.response), 10, 300)
+                .asyncTask(new WarcUrlParserTask(), 30, 1000)
                 .sink(new WarcSink())
                 .build();
 
         final JobExecutor jobExecutor = new JobExecutor();
-        jobExecutor.execute(parserJob);
+        jobExecutor.execute(
+                JobExecutionContext.builder()
+                        .preparedTaskCount(1000)
+                        .build(),
+                parserJob
+        );
     }
 }
