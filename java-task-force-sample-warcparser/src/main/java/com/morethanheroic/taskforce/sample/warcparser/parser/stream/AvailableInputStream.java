@@ -1,4 +1,4 @@
-package com.morethanheroic.taskforce.sample.warcparser.stream;
+package com.morethanheroic.taskforce.sample.warcparser.parser.stream;
 
 import lombok.RequiredArgsConstructor;
 
