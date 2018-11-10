@@ -8,10 +8,7 @@ import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -24,8 +21,8 @@ public class JobExecutor {
 
         final Semaphore semaphore = new Semaphore(jobExecutionContext.getPreparedTaskCount());
 
-        final Executor generatorExecutor = Executors.newSingleThreadExecutor();
-        final Executor sinkExecutor = Executors.newSingleThreadExecutor();
+        final ExecutorService generatorExecutor = Executors.newSingleThreadExecutor();
+        final ExecutorService sinkExecutor = Executors.newSingleThreadExecutor();
 
         final AtomicBoolean calculator = new AtomicBoolean(true);
 
@@ -78,6 +75,17 @@ public class JobExecutor {
 
                 return Optional.empty();
             });
+        }
+
+        // Cleaning up the executor services.
+        try {
+            semaphore.acquire(jobExecutionContext.getPreparedTaskCount());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            generatorExecutor.shutdown();
+            sinkExecutor.shutdown();
+            threadPoolCache.shutdown();
         }
     }
 }
