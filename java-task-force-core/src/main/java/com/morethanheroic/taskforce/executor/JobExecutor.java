@@ -80,6 +80,8 @@ public class JobExecutor {
         // Cleaning up the executor services.
         try {
             semaphore.acquire(jobExecutionContext.getPreparedTaskCount());
+
+            job.getSink().cleanup();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
