@@ -4,6 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.*;
 
+/**
+ * A {@link ThreadPoolExecutor} implementation that blocks the caller once a given amount of tasks is under processing.
+ * It is used to limit the task providers and avoid the over-filling of the work queue.
+ */
 @Slf4j
 public class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
 
