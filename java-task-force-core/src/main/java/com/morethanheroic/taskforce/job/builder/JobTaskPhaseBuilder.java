@@ -35,6 +35,11 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final Task<NEXT_INPUT, OUTPUT> task,
             final TaskContext taskContext) {
+        if (taskContext.getParallelismLevel() > taskContext.getMaxQueueSize()) {
+            throw new JobCreationException("Invalid arguments! A task's parallelism level should be higher than the " +
+                    "max queue size");
+        }
+
         final String taskName = UUID.randomUUID().toString();
 
         Task<NEXT_INPUT, OUTPUT> resultTask = task;
@@ -68,6 +73,11 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final String taskName, final Task<NEXT_INPUT, OUTPUT> task,
             final TaskContext taskContext) {
+        if (taskContext.getParallelismLevel() > taskContext.getMaxQueueSize()) {
+            throw new JobCreationException("Invalid arguments! A task's parallelism level should be higher than the " +
+                    "max queue size");
+        }
+
         Task<NEXT_INPUT, OUTPUT> resultTask = task;
 
         if (taskContext.isStatisticsCollectionEnabled() || taskContext.isStatisticsReportingEnabled()) {
@@ -126,7 +136,9 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final Task<NEXT_INPUT, OUTPUT> task,
             final int parallelismLevel) {
-        return asyncTask(UUID.randomUUID().toString(), task, parallelismLevel, 10000);
+        final int maxQueueSize = parallelismLevel > 10000 ? parallelismLevel : 10000;
+
+        return asyncTask(UUID.randomUUID().toString(), task, parallelismLevel, maxQueueSize);
     }
 
     /**
@@ -142,7 +154,9 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final String taskName, final Task<NEXT_INPUT, OUTPUT> task,
             final int parallelismLevel) {
-        return asyncTask(taskName, task, parallelismLevel, 10000);
+        final int maxQueueSize = parallelismLevel > 10000 ? parallelismLevel : 10000;
+
+        return asyncTask(taskName, task, parallelismLevel, maxQueueSize);
     }
 
     /**
@@ -160,6 +174,11 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final Task<NEXT_INPUT, OUTPUT> task,
             final int parallelismLevel, final int maxQueueSize) {
+        if (parallelismLevel > maxQueueSize) {
+            throw new JobCreationException("Invalid arguments! A task's parallelism level should be higher than the " +
+                    "max queue size");
+        }
+
         taskDescriptors.add(
                 TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
                         .parallelismLevel(parallelismLevel)
@@ -188,6 +207,11 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final String taskName, final Task<NEXT_INPUT, OUTPUT> task,
             final int parallelismLevel, final int maxQueueSize) {
+        if (parallelismLevel > maxQueueSize) {
+            throw new JobCreationException("Invalid arguments! A task's parallelism level should be higher than the " +
+                    "max queue size");
+        }
+
         taskDescriptors.add(
                 TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
                         .parallelismLevel(parallelismLevel)
