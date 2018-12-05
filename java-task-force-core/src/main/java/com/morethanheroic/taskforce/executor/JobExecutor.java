@@ -1,9 +1,6 @@
 package com.morethanheroic.taskforce.executor;
 
 import com.morethanheroic.taskforce.executor.domain.JobExecutionContext;
-import com.morethanheroic.taskforce.executor.pool.cache.ExecutorServiceFactory;
-import com.morethanheroic.taskforce.executor.pool.cache.ThreadPoolCache;
-import com.morethanheroic.taskforce.executor.pool.cache.ThreadPoolCacheFactory;
 import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,12 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class JobExecutor {
 
-    private final ThreadPoolCacheFactory threadPoolCacheFactory =
-            new ThreadPoolCacheFactory(new ExecutorServiceFactory());
-
     public void execute(final JobExecutionContext jobExecutionContext, final Job job) {
-        final ThreadPoolCache threadPoolCache = threadPoolCacheFactory.newThreadPoolCache(job.getTaskDescriptors());
-
         final Semaphore semaphore = new Semaphore(jobExecutionContext.getPreparedTaskCount());
 
         final ExecutorService generatorExecutor = Executors.newSingleThreadExecutor();
@@ -55,7 +47,7 @@ public class JobExecutor {
 
                             return taskDescriptor.getTask().execute(workingItem.get());
                         },
-                        threadPoolCache.getExecutor(taskDescriptor.getTask()));
+                        taskDescriptor.getExecutor());
             }
 
             completableFuture.thenAcceptAsync((workItem) -> {
@@ -89,7 +81,9 @@ public class JobExecutor {
         } finally {
             generatorExecutor.shutdown();
             sinkExecutor.shutdown();
-            threadPoolCache.shutdown();
+
+            job.getTaskDescriptors()
+                    .forEach(taskDescriptor -> taskDescriptor.getExecutor().shutdown());
         }
     }
 }

@@ -4,12 +4,10 @@ import com.morethanheroic.taskforce.task.Task;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 /**
- * A task descriptor wraps a {@link Task} and define all of the runtime properties (like parallelism level etc.) of the
- * wrapped task.
+ * A task descriptor wraps a {@link Task} and define the runtime properties of the wrapped task.
  *
  * @param <INPUT>  the input type of the wrapped task
  * @param <OUTPUT> the output type of the wrapped task
@@ -23,25 +21,17 @@ public class TaskDescriptor<INPUT, OUTPUT> {
      */
     private final Task<INPUT, OUTPUT> task;
 
+    /**
+     * The executor that should run this task.
+     */
     private final ExecutorService executor;
-
-    /**
-     * How many threads do we want to use when running the wrapped task.
-     */
-    private final int parallelismLevel;
-
-    /**
-     * How many items do we want in the queue that sits before the wrapped task. Setting this value too high can cause
-     * {@link OutOfMemoryError}s. It should be 0 or a higher than 0 positive integer.
-     */
-    private final int maxQueueSize;
 
     /**
      * The name of the task that this descriptor describe.
      */
     private final String taskName;
 
-    public Optional<ExecutorService> getExecutor() {
-        return Optional.ofNullable(executor);
+    public ExecutorService getExecutor() {
+        return executor;
     }
 }

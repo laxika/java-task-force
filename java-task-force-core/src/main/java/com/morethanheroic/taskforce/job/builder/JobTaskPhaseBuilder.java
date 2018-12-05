@@ -1,5 +1,7 @@
 package com.morethanheroic.taskforce.job.builder;
 
+import com.morethanheroic.taskforce.executor.pool.cache.ExecutorServiceFactory;
+import com.morethanheroic.taskforce.executor.pool.cache.domain.ExecutorContext;
 import com.morethanheroic.taskforce.job.builder.domain.TaskStageJobContext;
 import com.morethanheroic.taskforce.job.builder.domain.GeneratorStageJobContext;
 import com.morethanheroic.taskforce.sink.Sink;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Initialize the second phase of the {@link com.morethanheroic.taskforce.job.Job} creation process. The users can add
@@ -23,6 +26,8 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
 
     private final GeneratorStageJobContext jobContext;
     private final List<TaskDescriptor<?, ?>> taskDescriptors = new ArrayList<>();
+    //TODO: Move this factory out to the JobBuilder.builder(...) method so it can be configured by the users
+    private final ExecutorServiceFactory executorServiceFactory = new ExecutorServiceFactory();
 
     /**
      * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be added based on the
@@ -43,16 +48,21 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
 
         final String taskName = UUID.randomUUID().toString();
 
+        final ThreadPoolExecutor threadPoolExecutor = executorServiceFactory.newExecutorService(
+                ExecutorContext.builder()
+                        .parallelismLevel(taskContext.getParallelismLevel())
+                        .maxQueueSize(taskContext.getMaxQueueSize())
+                        .build()
+        );
         Task<NEXT_INPUT, OUTPUT> resultTask = task;
         if (taskContext.isStatisticsCollectionEnabled() || taskContext.isStatisticsReportingEnabled()) {
             resultTask = new StatisticsDecoratorTask<>(taskName, task, taskContext.isStatisticsReportingEnabled(),
-                    taskContext.getStatisticsReportingRate());
+                    taskContext.getStatisticsReportingRate(), threadPoolExecutor);
         }
 
         taskDescriptors.add(
                 TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
-                        .parallelismLevel(taskContext.getParallelismLevel())
-                        .maxQueueSize(taskContext.getMaxQueueSize())
+                        .executor(threadPoolExecutor)
                         .taskName(taskName)
                         .task(resultTask)
                         .build()
@@ -79,17 +89,20 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
                     "max queue size");
         }
 
+        final ThreadPoolExecutor threadPoolExecutor = executorServiceFactory.newExecutorService(
+                ExecutorContext.builder()
+                        .parallelismLevel(taskContext.getParallelismLevel())
+                        .maxQueueSize(taskContext.getMaxQueueSize())
+                        .build()
+        );
         Task<NEXT_INPUT, OUTPUT> resultTask = task;
-
         if (taskContext.isStatisticsCollectionEnabled() || taskContext.isStatisticsReportingEnabled()) {
             resultTask = new StatisticsDecoratorTask<>(taskName, task, taskContext.isStatisticsReportingEnabled(),
-                    taskContext.getStatisticsReportingRate());
+                    taskContext.getStatisticsReportingRate(), threadPoolExecutor);
         }
 
         taskDescriptors.add(
                 TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
-                        .parallelismLevel(taskContext.getParallelismLevel())
-                        .maxQueueSize(taskContext.getMaxQueueSize())
                         .taskName(taskName)
                         .task(resultTask)
                         .build()
@@ -180,16 +193,9 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
                     "max queue size");
         }
 
-        taskDescriptors.add(
-                TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
-                        .parallelismLevel(parallelismLevel)
-                        .maxQueueSize(maxQueueSize)
-                        .taskName(UUID.randomUUID().toString())
-                        .task(task)
-                        .build()
-        );
+        final String taskName = UUID.randomUUID().toString();
 
-        return (JobTaskPhaseBuilder<OUTPUT>) this;
+        return asyncTask(taskName, task, parallelismLevel, maxQueueSize);
     }
 
     /**
@@ -213,10 +219,16 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
                     "max queue size");
         }
 
+        final ThreadPoolExecutor threadPoolExecutor = executorServiceFactory.newExecutorService(
+                ExecutorContext.builder()
+                        .parallelismLevel(parallelismLevel)
+                        .maxQueueSize(parallelismLevel)
+                        .build()
+        );
+
         taskDescriptors.add(
                 TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
-                        .parallelismLevel(parallelismLevel)
-                        .maxQueueSize(maxQueueSize)
+                        .executor(threadPoolExecutor)
                         .taskName(taskName)
                         .task(task)
                         .build()
@@ -236,7 +248,7 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
      */
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final Task<NEXT_INPUT, OUTPUT> task,
-            final ExecutorService executorService) {
+            final ThreadPoolExecutor executorService) {
         taskDescriptors.add(
                 TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
                         .executor(executorService)
@@ -260,7 +272,7 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
      */
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final String taskName, final Task<NEXT_INPUT, OUTPUT> task,
-            final ExecutorService executorService) {
+            final ThreadPoolExecutor executorService) {
         taskDescriptors.add(
                 TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
                         .executor(executorService)

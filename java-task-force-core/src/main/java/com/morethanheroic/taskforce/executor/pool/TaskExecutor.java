@@ -14,16 +14,16 @@ import java.util.concurrent.TimeUnit;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TaskExecutor {
 
-    private final static ExecutorService io = new BlockingThreadPoolExecutor(0, Integer.MAX_VALUE, 60,
+    private final static ThreadPoolExecutor io = new BlockingThreadPoolExecutor(0, Integer.MAX_VALUE, 60,
             TimeUnit.SECONDS, 1000, Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
 
-    private final static ExecutorService compute = new BlockingThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 0,
+    private final static ThreadPoolExecutor compute = new BlockingThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 0,
             TimeUnit.SECONDS, 10000, Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
 
     /**
-     * The {@link ExecutorService} provided by this method is a good fit for io-heavy workloads. The thread count in
+     * The {@link ThreadPoolExecutor} provided by this method is a good fit for io-heavy workloads. The thread count in
      * this executor is non-fixed and new threads are automatically created/shut down based on the work available.
-     * Because of this, running compute-heavy workloads in this {@link ExecutorService} is not recommended.
+     * Because of this, running compute-heavy workloads in this {@link ThreadPoolExecutor} is not recommended.
      * <p>
      * The maximum amount of items in the work queue is 1000. After that the executor will block the threads
      * that try to submit new tasks to the executor. This is necessary to avoid {@link OutOfMemoryError}s if the
@@ -31,14 +31,14 @@ public class TaskExecutor {
      *
      * @return an executor service fit for io-heavy workloads
      */
-    public static ExecutorService io() {
+    public static ThreadPoolExecutor io() {
         return io;
     }
 
     /**
-     * The {@link ExecutorService} provided by this method is a good fit for compute-heavy workloads. The thread count
+     * The {@link ThreadPoolExecutor} provided by this method is a good fit for compute-heavy workloads. The thread count
      * in this executor is equals to the amount of the processor cores available to the JVM. Because of this, running
-     * io-heavy workloads in this {@link ExecutorService} is not recommended.
+     * io-heavy workloads in this {@link ThreadPoolExecutor} is not recommended.
      * <p>
      * The maximum amount of items in the work queue is 10000. After that the executor will block the threads
      * that try to submit new tasks to the executor. This is necessary to avoid {@link OutOfMemoryError}s if the
@@ -46,7 +46,7 @@ public class TaskExecutor {
      *
      * @return an executor service fit for compute-heavy workloads
      */
-    public static ExecutorService compute() {
+    public static ThreadPoolExecutor compute() {
         return compute;
     }
 }
