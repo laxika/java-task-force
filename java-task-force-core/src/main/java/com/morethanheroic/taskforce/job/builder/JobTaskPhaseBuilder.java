@@ -87,7 +87,8 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final String taskName, final Task<NEXT_INPUT, OUTPUT> task,
             final TaskContext taskContext) {
-        if (taskContext.getParallelismLevel() > taskContext.getMaxQueueSize()) {
+        if (!taskContext.getExecutor().isPresent()
+                && taskContext.getParallelismLevel() > taskContext.getMaxQueueSize()) {
             throw new JobCreationException("Invalid arguments! A task's parallelism level should be higher than the " +
                     "max queue size");
         }
@@ -190,15 +191,10 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final String taskName, final Task<NEXT_INPUT, OUTPUT> task,
             final int parallelismLevel, final int maxQueueSize) {
-        if (parallelismLevel > maxQueueSize) {
-            throw new JobCreationException("Invalid arguments! A task's parallelism level should be higher than the " +
-                    "max queue size");
-        }
-
         final ThreadPoolExecutor threadPoolExecutor = executorServiceFactory.newExecutorService(
                 ExecutorContext.builder()
                         .parallelismLevel(parallelismLevel)
-                        .maxQueueSize(parallelismLevel)
+                        .maxQueueSize(maxQueueSize)
                         .build()
         );
 
@@ -235,15 +231,11 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final String taskName, final Task<NEXT_INPUT, OUTPUT> task,
             final ThreadPoolExecutor executorService) {
-        taskDescriptors.add(
-                TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
+        return task(taskName, task,
+                TaskContext.builder()
                         .executor(executorService)
-                        .taskName(taskName)
-                        .task(task)
                         .build()
         );
-
-        return (JobTaskPhaseBuilder<OUTPUT>) this;
     }
 
     /**
