@@ -29,6 +29,34 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     //TODO: Move this factory out to the JobBuilder.builder(...) method so it can be configured by the users
     private final ExecutorServiceFactory executorServiceFactory = new ExecutorServiceFactory();
 
+
+    /**
+     * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be run with parallelism
+     * level 1 in it's own thread pool. The task's name will be an unique randomly generated Id (UUID).
+     *
+     * @param task     the task to add
+     * @param <OUTPUT> the result type of the added task
+     * @return this builder
+     */
+    @SuppressWarnings("unchecked")
+    public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final Task<NEXT_INPUT, OUTPUT> task) {
+        return asyncTask(UUID.randomUUID().toString(), task, 1);
+    }
+
+    /**
+     * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be run with parallelism
+     * level 1 in it's own thread pool.
+     *
+     * @param taskName the name of the task
+     * @param task     the task to add
+     * @param <OUTPUT> the result type of the added task
+     * @return this builder
+     */
+    @SuppressWarnings("unchecked")
+    public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final String taskName, final Task<NEXT_INPUT, OUTPUT> task) {
+        return asyncTask(taskName, task, 1);
+    }
+
     /**
      * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be added based on the
      * provided {@link TaskContext}. The task's name will be an unique randomly generated Id (UUID).
@@ -41,34 +69,9 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final Task<NEXT_INPUT, OUTPUT> task,
             final TaskContext taskContext) {
-        if (taskContext.getParallelismLevel() > taskContext.getMaxQueueSize()) {
-            throw new JobCreationException("Invalid arguments! A task's parallelism level should be higher than the " +
-                    "max queue size");
-        }
-
         final String taskName = UUID.randomUUID().toString();
 
-        final ThreadPoolExecutor threadPoolExecutor = executorServiceFactory.newExecutorService(
-                ExecutorContext.builder()
-                        .parallelismLevel(taskContext.getParallelismLevel())
-                        .maxQueueSize(taskContext.getMaxQueueSize())
-                        .build()
-        );
-        Task<NEXT_INPUT, OUTPUT> resultTask = task;
-        if (taskContext.isStatisticsCollectionEnabled() || taskContext.isStatisticsReportingEnabled()) {
-            resultTask = new StatisticsDecoratorTask<>(taskName, task, taskContext.isStatisticsReportingEnabled(),
-                    taskContext.getStatisticsReportingRate(), threadPoolExecutor);
-        }
-
-        taskDescriptors.add(
-                TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
-                        .executor(threadPoolExecutor)
-                        .taskName(taskName)
-                        .task(resultTask)
-                        .build()
-        );
-
-        return (JobTaskPhaseBuilder<OUTPUT>) this;
+        return task(taskName, task, taskContext);
     }
 
     /**
@@ -103,39 +106,13 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
 
         taskDescriptors.add(
                 TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
+                        .executor(threadPoolExecutor)
                         .taskName(taskName)
                         .task(resultTask)
                         .build()
         );
 
         return (JobTaskPhaseBuilder<OUTPUT>) this;
-    }
-
-    /**
-     * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be run with parallelism
-     * level 1 in it's own thread pool. The task's name will be an unique randomly generated Id (UUID).
-     *
-     * @param task     the task to add
-     * @param <OUTPUT> the result type of the added task
-     * @return this builder
-     */
-    @SuppressWarnings("unchecked")
-    public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final Task<NEXT_INPUT, OUTPUT> task) {
-        return asyncTask(UUID.randomUUID().toString(), task, 1);
-    }
-
-    /**
-     * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be run with parallelism
-     * level 1 in it's own thread pool.
-     *
-     * @param taskName the name of the task
-     * @param task     the task to add
-     * @param <OUTPUT> the result type of the added task
-     * @return this builder
-     */
-    @SuppressWarnings("unchecked")
-    public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final String taskName, final Task<NEXT_INPUT, OUTPUT> task) {
-        return asyncTask(taskName, task, 1);
     }
 
     /**
@@ -152,7 +129,7 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
             final int parallelismLevel) {
         final int maxQueueSize = parallelismLevel > 10000 ? parallelismLevel : 10000;
 
-        return asyncTask(UUID.randomUUID().toString(), task, parallelismLevel, maxQueueSize);
+        return asyncTask(task, parallelismLevel, maxQueueSize);
     }
 
     /**
@@ -188,11 +165,6 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final Task<NEXT_INPUT, OUTPUT> task,
             final int parallelismLevel, final int maxQueueSize) {
-        if (parallelismLevel > maxQueueSize) {
-            throw new JobCreationException("Invalid arguments! A task's parallelism level should be higher than the " +
-                    "max queue size");
-        }
-
         final String taskName = UUID.randomUUID().toString();
 
         return asyncTask(taskName, task, parallelismLevel, maxQueueSize);
@@ -226,15 +198,7 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
                         .build()
         );
 
-        taskDescriptors.add(
-                TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
-                        .executor(threadPoolExecutor)
-                        .taskName(taskName)
-                        .task(task)
-                        .build()
-        );
-
-        return (JobTaskPhaseBuilder<OUTPUT>) this;
+        return asyncTask(taskName, task, threadPoolExecutor);
     }
 
     /**
@@ -249,15 +213,9 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final Task<NEXT_INPUT, OUTPUT> task,
             final ThreadPoolExecutor executorService) {
-        taskDescriptors.add(
-                TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
-                        .executor(executorService)
-                        .taskName(UUID.randomUUID().toString())
-                        .task(task)
-                        .build()
-        );
+        final String taskName = UUID.randomUUID().toString();
 
-        return (JobTaskPhaseBuilder<OUTPUT>) this;
+        return asyncTask(taskName, task, executorService);
     }
 
     /**
