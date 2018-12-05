@@ -26,20 +26,25 @@ public class WarcParserApplication {
 
         final Job parserJob = JobBuilder.newBuilder()
                 .generator(new WarcGenerator(warcStreamFactory.newWarcStream()))
-                .task(new RecordTypeFilterTask(RecordType.RESPONSE),
+                .task("record-type-filter", new RecordTypeFilterTask(RecordType.RESPONSE),
                         TaskContext.builder()
                                 .statisticsCollectionEnabled(true)
                                 .statisticsReportingEnabled(true)
-                                .statisticsReportingRate(100)
                                 .build()
                 )
-                .task(new RecordContentTypeFilterTask(
+                .task("record-content-type-filter", new RecordContentTypeFilterTask(
                         ContentType.TEXT_HTML,
                         ContentType.APPLICATION_HTML,
                         ContentType.APPLICATION_HTTP
                 ))
-                .asyncTask(new WarcUrlParserTask(), TaskExecutor.compute())
-                .task(new UrlProtocolFilterTask("mailto"))
+                .task("url-parser-task", new WarcUrlParserTask(),
+                        TaskContext.builder()
+                                .statisticsCollectionEnabled(true)
+                                .statisticsReportingEnabled(true)
+                                .executor(TaskExecutor.compute())
+                                .build()
+                )
+                .task("url-protocol-filter", new UrlProtocolFilterTask("mailto"))
                 .sink(LoggingSink.of("Logged url: {}", false))
                 .build();
 

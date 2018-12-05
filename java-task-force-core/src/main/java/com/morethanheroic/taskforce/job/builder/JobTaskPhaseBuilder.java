@@ -32,7 +32,7 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
 
     /**
      * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be run with parallelism
-     * level 1 in it's own thread pool. The task's name will be an unique randomly generated Id (UUID).
+     * level 1 in it's own thread pool. The task's name will be an unique randomly generated Id ({@link UUID}).
      *
      * @param task     the task to add
      * @param <OUTPUT> the result type of the added task
@@ -59,7 +59,7 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
 
     /**
      * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be added based on the
-     * provided {@link TaskContext}. The task's name will be an unique randomly generated Id (UUID).
+     * provided {@link TaskContext}. The task's name will be an unique randomly generated Id ({@link UUID}).
      *
      * @param task        the task to add
      * @param taskContext the context we want to add the task with
@@ -92,12 +92,15 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
                     "max queue size");
         }
 
-        final ThreadPoolExecutor threadPoolExecutor = executorServiceFactory.newExecutorService(
-                ExecutorContext.builder()
-                        .parallelismLevel(taskContext.getParallelismLevel())
-                        .maxQueueSize(taskContext.getMaxQueueSize())
-                        .build()
-        );
+        final ThreadPoolExecutor threadPoolExecutor = taskContext.getExecutor()
+                .orElse(
+                        executorServiceFactory.newExecutorService(
+                                ExecutorContext.builder()
+                                        .parallelismLevel(taskContext.getParallelismLevel())
+                                        .maxQueueSize(taskContext.getMaxQueueSize())
+                                        .build()
+                        )
+                );
         Task<NEXT_INPUT, OUTPUT> resultTask = task;
         if (taskContext.isStatisticsCollectionEnabled() || taskContext.isStatisticsReportingEnabled()) {
             resultTask = new StatisticsDecoratorTask<>(taskName, task, taskContext.isStatisticsReportingEnabled(),
@@ -117,7 +120,8 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
 
     /**
      * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be run with the provided
-     * level of parallelism in it's own thread pool. The task's name will be an unique randomly generated Id (UUID).
+     * level of parallelism in it's own thread pool. The task's name will be an unique randomly generated Id
+     * ({@link UUID}).
      *
      * @param task             the task to add
      * @param parallelismLevel the parallelism level of the task
@@ -152,9 +156,9 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
 
     /**
      * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be run with the provided
-     * level of parallelism in it's own thread pool. The task's name will be an unique randomly generated Id (UUID).
-     * The size of the queue that holds the data in the thread pool can also be set. When the generator or the task
-     * above create more entries that allowed by the queue it will be blocked.
+     * level of parallelism in it's own thread pool. The task's name will be an unique randomly generated Id
+     * ({@link UUID}). The size of the queue that holds the data in the thread pool can also be set. When the generator
+     * or the task above create more entries that allowed by the queue it will be blocked.
      *
      * @param task             the task to add
      * @param parallelismLevel the parallelism level of the task
@@ -203,7 +207,7 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
 
     /**
      * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will run on the provided
-     * {@link ExecutorService}.
+     * {@link ExecutorService}. The task's name will be an unique randomly generated Id ({@link UUID}).
      *
      * @param task            the task to add
      * @param executorService the executor service to run the task on
