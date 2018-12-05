@@ -13,7 +13,9 @@ import com.morethanheroic.taskforce.sample.warcparser.parser.task.RecordContentT
 import com.morethanheroic.taskforce.sample.warcparser.parser.task.RecordTypeFilterTask;
 import com.morethanheroic.taskforce.sample.warcparser.parser.task.UrlProtocolFilterTask;
 import com.morethanheroic.taskforce.sample.warcparser.parser.task.WarcUrlParserTask;
+import com.morethanheroic.taskforce.sink.DiscardingSink;
 import com.morethanheroic.taskforce.sink.LoggingSink;
+import com.morethanheroic.taskforce.task.domain.TaskContext;
 
 import java.io.IOException;
 
@@ -24,7 +26,13 @@ public class WarcParserApplication {
 
         final Job parserJob = JobBuilder.newBuilder()
                 .generator(new WarcGenerator(warcStreamFactory.newWarcStream()))
-                .task(new RecordTypeFilterTask(RecordType.RESPONSE))
+                .task(new RecordTypeFilterTask(RecordType.RESPONSE),
+                        TaskContext.builder()
+                                .statisticsCollectionEnabled(true)
+                                .statisticsReportingEnabled(true)
+                                .statisticsReportingRate(100)
+                                .build()
+                )
                 .task(new RecordContentTypeFilterTask(
                         ContentType.TEXT_HTML,
                         ContentType.APPLICATION_HTML,

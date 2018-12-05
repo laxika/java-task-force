@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.LongAdder;
  * This class is a decorator for a {@link Task}. It wraps the underlying task and adds a statistics collecting
  * and reporting functionality.
  *
- * @param <INPUT> the input of the underlying task
+ * @param <INPUT>  the input of the underlying task
  * @param <OUTPUT> the output of the underlying task
  */
 @Slf4j
@@ -54,10 +54,10 @@ public class StatisticsDecoratorTask<INPUT, OUTPUT> implements Task<INPUT, OUTPU
         if (reportingEnabled && totalResultCount % reportingRate == 0) {
             final long successfulCount = successfulItemCount.sum();
             final long unsuccessfulCount = unsuccessfulItemCount.sum();
+            final long totalInvocation = successfulCount + unsuccessfulCount;
 
-            log.info("[STATISTICS]: The '" + delegateName + "' task ran " + (successfulCount + unsuccessfulCount)
-                    + " times." + " Successful invocations: " + successfulCount + " unsuccessful invocations: "
-                    + unsuccessfulCount + ".");
+            log.info("[STATISTICS]: The '{}' task ran {} times. Successful invocations: {} unsuccessful " +
+                    "invocations: {}.", delegateName, totalInvocation, successfulCount, unsuccessfulCount);
         }
     }
 }
