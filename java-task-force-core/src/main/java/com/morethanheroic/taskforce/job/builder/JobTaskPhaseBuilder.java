@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Initialize the second phase of the {@link com.morethanheroic.taskforce.job.Job} creation process. The users can add
@@ -216,6 +217,53 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
                 TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
                         .parallelismLevel(parallelismLevel)
                         .maxQueueSize(maxQueueSize)
+                        .taskName(taskName)
+                        .task(task)
+                        .build()
+        );
+
+        return (JobTaskPhaseBuilder<OUTPUT>) this;
+    }
+
+    /**
+     * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will run on the provided
+     * {@link ExecutorService}.
+     *
+     * @param task            the task to add
+     * @param executorService the executor service to run the task on
+     * @param <OUTPUT>        the result type of the added task
+     * @return this builder
+     */
+    @SuppressWarnings("unchecked")
+    public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final Task<NEXT_INPUT, OUTPUT> task,
+            final ExecutorService executorService) {
+        taskDescriptors.add(
+                TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
+                        .executor(executorService)
+                        .taskName(UUID.randomUUID().toString())
+                        .task(task)
+                        .build()
+        );
+
+        return (JobTaskPhaseBuilder<OUTPUT>) this;
+    }
+
+    /**
+     * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will run on the provided
+     * {@link ExecutorService}.
+     *
+     * @param taskName        the name of the task
+     * @param task            the task to add
+     * @param executorService the executor service to run the task on
+     * @param <OUTPUT>        the result type of the added task
+     * @return this builder
+     */
+    @SuppressWarnings("unchecked")
+    public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> asyncTask(final String taskName, final Task<NEXT_INPUT, OUTPUT> task,
+            final ExecutorService executorService) {
+        taskDescriptors.add(
+                TaskDescriptor.<NEXT_INPUT, OUTPUT>builder()
+                        .executor(executorService)
                         .taskName(taskName)
                         .task(task)
                         .build()

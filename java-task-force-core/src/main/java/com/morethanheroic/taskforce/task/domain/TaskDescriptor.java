@@ -4,6 +4,9 @@ import com.morethanheroic.taskforce.task.Task;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+
 /**
  * A task descriptor wraps a {@link Task} and define all of the runtime properties (like parallelism level etc.) of the
  * wrapped task.
@@ -20,6 +23,8 @@ public class TaskDescriptor<INPUT, OUTPUT> {
      */
     private final Task<INPUT, OUTPUT> task;
 
+    private final ExecutorService executor;
+
     /**
      * How many threads do we want to use when running the wrapped task.
      */
@@ -35,4 +40,8 @@ public class TaskDescriptor<INPUT, OUTPUT> {
      * The name of the task that this descriptor describe.
      */
     private final String taskName;
+
+    public Optional<ExecutorService> getExecutor() {
+        return Optional.ofNullable(executor);
+    }
 }

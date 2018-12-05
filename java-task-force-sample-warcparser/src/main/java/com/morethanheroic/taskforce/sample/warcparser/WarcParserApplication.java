@@ -2,6 +2,7 @@ package com.morethanheroic.taskforce.sample.warcparser;
 
 import com.morethanheroic.taskforce.executor.JobExecutor;
 import com.morethanheroic.taskforce.executor.domain.JobExecutionContext;
+import com.morethanheroic.taskforce.executor.pool.TaskExecutor;
 import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.job.builder.JobBuilder;
 import com.morethanheroic.taskforce.sample.warcparser.parser.domain.ContentType;
@@ -29,7 +30,7 @@ public class WarcParserApplication {
                         ContentType.APPLICATION_HTML,
                         ContentType.APPLICATION_HTTP
                 ))
-                .asyncTask(new WarcUrlParserTask(), 50, 1000)
+                .asyncTask(new WarcUrlParserTask(), TaskExecutor.compute())
                 .task(new UrlProtocolFilterTask("mailto"))
                 .sink(LoggingSink.of("Logged url: {}", false))
                 .build();

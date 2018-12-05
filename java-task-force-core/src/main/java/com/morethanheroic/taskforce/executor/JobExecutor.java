@@ -1,6 +1,7 @@
 package com.morethanheroic.taskforce.executor;
 
 import com.morethanheroic.taskforce.executor.domain.JobExecutionContext;
+import com.morethanheroic.taskforce.executor.pool.cache.ExecutorServiceFactory;
 import com.morethanheroic.taskforce.executor.pool.cache.ThreadPoolCache;
 import com.morethanheroic.taskforce.executor.pool.cache.ThreadPoolCacheFactory;
 import com.morethanheroic.taskforce.job.Job;
@@ -14,7 +15,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class JobExecutor {
 
-    private final ThreadPoolCacheFactory threadPoolCacheFactory = new ThreadPoolCacheFactory();
+    private final ThreadPoolCacheFactory threadPoolCacheFactory =
+            new ThreadPoolCacheFactory(new ExecutorServiceFactory());
 
     public void execute(final JobExecutionContext jobExecutionContext, final Job job) {
         final ThreadPoolCache threadPoolCache = threadPoolCacheFactory.newThreadPoolCache(job.getTaskDescriptors());

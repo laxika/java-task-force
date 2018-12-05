@@ -22,7 +22,6 @@ public class BlockingThreadPoolExecutor extends ThreadPoolExecutor {
         semaphore = new Semaphore(workQueueSize);
     }
 
-
     @Override
     public void execute(final Runnable task) {
         boolean acquired = false;
