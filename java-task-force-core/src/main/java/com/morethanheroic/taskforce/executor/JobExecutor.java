@@ -12,6 +12,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class JobExecutor {
 
+    public void execute(final Job job) {
+        execute(JobExecutionContext.builder().build(), job);
+    }
+
     public void execute(final JobExecutionContext jobExecutionContext, final Job job) {
         final Semaphore semaphore = new Semaphore(jobExecutionContext.getPreparedTaskCount());
 

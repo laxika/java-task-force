@@ -49,11 +49,6 @@ public class WarcParserApplication {
                 .build();
 
         final JobExecutor jobExecutor = new JobExecutor();
-        jobExecutor.execute(
-                JobExecutionContext.builder()
-                        .preparedTaskCount(10000)
-                        .build(),
-                parserJob
-        );
+        jobExecutor.execute(parserJob);
     }
 }
