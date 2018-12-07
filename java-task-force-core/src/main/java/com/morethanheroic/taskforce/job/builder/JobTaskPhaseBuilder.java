@@ -38,7 +38,6 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
      * @param <OUTPUT> the result type of the added task
      * @return this builder
      */
-    @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final Task<NEXT_INPUT, OUTPUT> task) {
         return asyncTask(UUID.randomUUID().toString(), task, 1);
     }

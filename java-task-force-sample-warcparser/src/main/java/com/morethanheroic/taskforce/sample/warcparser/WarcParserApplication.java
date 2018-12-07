@@ -1,7 +1,6 @@
 package com.morethanheroic.taskforce.sample.warcparser;
 
 import com.morethanheroic.taskforce.executor.JobExecutor;
-import com.morethanheroic.taskforce.executor.domain.JobExecutionContext;
 import com.morethanheroic.taskforce.executor.pool.TaskExecutor;
 import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.job.builder.JobBuilder;
@@ -13,7 +12,6 @@ import com.morethanheroic.taskforce.sample.warcparser.parser.task.RecordContentT
 import com.morethanheroic.taskforce.sample.warcparser.parser.task.RecordTypeFilterTask;
 import com.morethanheroic.taskforce.sample.warcparser.parser.task.UrlProtocolFilterTask;
 import com.morethanheroic.taskforce.sample.warcparser.parser.task.WarcUrlParserTask;
-import com.morethanheroic.taskforce.sink.DiscardingSink;
 import com.morethanheroic.taskforce.sink.LoggingSink;
 import com.morethanheroic.taskforce.task.domain.TaskContext;
 
@@ -33,10 +31,16 @@ public class WarcParserApplication {
                                 .build()
                 )
                 .task("record-content-type-filter", new RecordContentTypeFilterTask(
-                        ContentType.TEXT_HTML,
-                        ContentType.APPLICATION_HTML,
-                        ContentType.APPLICATION_HTTP
-                ))
+                                ContentType.TEXT_HTML,
+                                ContentType.APPLICATION_HTML,
+                                ContentType.APPLICATION_HTTP
+                        ),
+                        TaskContext.builder()
+                                .statisticsCollectionEnabled(true)
+                                .statisticsReportingEnabled(true)
+                                .executor(TaskExecutor.compute())
+                                .build()
+                )
                 .task("url-parser-task", new WarcUrlParserTask(),
                         TaskContext.builder()
                                 .statisticsCollectionEnabled(true)

@@ -3,22 +3,15 @@ package com.morethanheroic.taskforce.executor.pool;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Provides generic and reusable {@link ExecutorService}s to run various {@link com.morethanheroic.taskforce.task.Task}s.
+ * Provides generic {@link ThreadPoolExecutor}s to run various {@link com.morethanheroic.taskforce.task.Task}s.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TaskExecutor {
-
-    private final static ThreadPoolExecutor io = new BlockingThreadPoolExecutor(0, Integer.MAX_VALUE, 60,
-            TimeUnit.SECONDS, 1000, Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
-
-    private final static ThreadPoolExecutor compute = new BlockingThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 0,
-            TimeUnit.SECONDS, 10000, Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
 
     /**
      * The {@link ThreadPoolExecutor} provided by this method is a good fit for io-heavy workloads. The thread count in
@@ -32,7 +25,8 @@ public class TaskExecutor {
      * @return an executor service fit for io-heavy workloads
      */
     public static ThreadPoolExecutor io() {
-        return io;
+        return new BlockingThreadPoolExecutor(0, Integer.MAX_VALUE, 60,
+                TimeUnit.SECONDS, 1000, Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
     }
 
     /**
@@ -47,6 +41,7 @@ public class TaskExecutor {
      * @return an executor service fit for compute-heavy workloads
      */
     public static ThreadPoolExecutor compute() {
-        return compute;
+        return new BlockingThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors(), 0,
+                TimeUnit.SECONDS, 10000, Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
     }
 }
