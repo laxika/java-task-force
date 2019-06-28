@@ -1,6 +1,5 @@
 package com.morethanheroic.taskforce.executor;
 
-import com.morethanheroic.taskforce.executor.domain.JobExecutionContext;
 import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,81 +12,71 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class JobExecutor {
 
     public void execute(final Job job) {
-        execute(JobExecutionContext.builder().build(), job);
+        execute(job, Runtime.getRuntime().availableProcessors());
     }
 
-    public void execute(final JobExecutionContext jobExecutionContext, final Job job) {
-        final Semaphore semaphore = new Semaphore(jobExecutionContext.getPreparedTaskCount());
-
-        final ExecutorService generatorExecutor = Executors.newSingleThreadExecutor();
-        final ExecutorService sinkExecutor = Executors.newSingleThreadExecutor();
+    public void execute(final Job job, final int threadCount) {
+        final Semaphore semaphore = new Semaphore(threadCount);
+        final ExecutorService taskExecutorService = Executors.newFixedThreadPool(threadCount);
 
         final AtomicBoolean calculator = new AtomicBoolean(true);
-
         while (calculator.get()) {
             try {
                 semaphore.acquire();
             } catch (InterruptedException e) {
+                //TODO!
                 e.printStackTrace();
             }
 
-            CompletableFuture<Optional<?>> completableFuture = CompletableFuture.supplyAsync(() -> {
+            try {
                 final Optional<?> generationResult = job.getGenerator().generate();
 
                 if (!generationResult.isPresent()) {
                     calculator.set(false);
                 }
 
-                return generationResult;
-            }, generatorExecutor);
+                taskExecutorService.submit(() -> {
+                    try {
+                        Optional<?> workItem = generationResult;
 
-            for (TaskDescriptor taskDescriptor : job.getTaskDescriptors()) {
-                completableFuture = completableFuture.thenApplyAsync(
-                        (workingItem) -> {
+                        for (TaskDescriptor taskDescriptor : job.getTaskDescriptors()) {
                             //Skip empty working items
-                            if (!workingItem.isPresent()) {
-                                return Optional.empty();
+                            if (!workItem.isPresent()) {
+                                return;
                             }
 
-                            return taskDescriptor.getTask().execute(workingItem.get());
-                        },
-                        taskDescriptor.getExecutor());
-            }
+                            workItem = taskDescriptor.getTask().execute(workItem.get());
+                        }
 
-            completableFuture.thenAcceptAsync((workItem) -> {
-                workItem.ifPresent(o -> {
-                    try {
-                        job.getSink().consume(o);
+                        if (!workItem.isPresent()) {
+                            return;
+                        }
+
+                        job.getSink().consume(workItem.get());
+
                     } catch (Exception e) {
+                        //TODO: I don't think we need this here!
                         e.printStackTrace();
+                    } finally {
+                        semaphore.release();
                     }
                 });
-
-                semaphore.release();
-            }, sinkExecutor);
-
-            completableFuture.exceptionally((e) -> {
-                log.error("Error while executing a job!", e);
-
-                semaphore.release();
-
-                return Optional.empty();
-            });
+            } catch (Exception e) {
+                // This catch is handling the generator's exceptions!
+                //TODO: I don't think we need this here!
+                e.printStackTrace();
+            }
         }
 
         // Cleaning up the executor services.
         try {
-            semaphore.acquire(jobExecutionContext.getPreparedTaskCount());
+            semaphore.acquire(threadCount);
 
             job.getSink().cleanup();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            generatorExecutor.shutdown();
-            sinkExecutor.shutdown();
-
-            job.getTaskDescriptors()
-                    .forEach(taskDescriptor -> taskDescriptor.getExecutor().shutdown());
+            taskExecutorService.shutdown();
         }
     }
 }

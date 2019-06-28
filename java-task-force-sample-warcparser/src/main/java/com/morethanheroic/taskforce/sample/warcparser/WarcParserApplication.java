@@ -1,7 +1,6 @@
 package com.morethanheroic.taskforce.sample.warcparser;
 
 import com.morethanheroic.taskforce.executor.JobExecutor;
-import com.morethanheroic.taskforce.executor.pool.TaskExecutor;
 import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.job.builder.JobBuilder;
 import com.morethanheroic.taskforce.sample.warcparser.parser.domain.ContentType;
@@ -38,14 +37,12 @@ public class WarcParserApplication {
                         TaskContext.builder()
                                 .statisticsCollectionEnabled(true)
                                 .statisticsReportingEnabled(true)
-                                .executor(TaskExecutor.compute())
                                 .build()
                 )
                 .task("url-parser-task", new WarcUrlParserTask(),
                         TaskContext.builder()
                                 .statisticsCollectionEnabled(true)
                                 .statisticsReportingEnabled(true)
-                                .executor(TaskExecutor.compute())
                                 .build()
                 )
                 .task("url-protocol-filter", new UrlProtocolFilterTask("mailto"))
