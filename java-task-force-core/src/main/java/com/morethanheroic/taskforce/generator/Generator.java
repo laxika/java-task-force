@@ -16,4 +16,14 @@ public interface Generator<RESULT> {
      * @return an items to be processed by the registered tasks
      */
     Optional<RESULT> generate();
+
+    default void open() {
+    }
+
+    /**
+     * This method is called after the last element is successfully created by the generator. The control is not going to
+     * be returned to the executor of the job until this method is successfully finish the execution.
+     */
+    default void close() {
+    }
 }

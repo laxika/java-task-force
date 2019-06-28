@@ -21,6 +21,6 @@ public interface Sink<INPUT> {
      * This method is called after the last element is successfully processed by the job. The control is not going to
      * be returned to the executor of the job until this method is successfully finish the execution.
      */
-    default void cleanup() {
+    default void close() {
     }
 }

@@ -31,7 +31,7 @@ public class LoggingSink<INPUT> implements Sink<INPUT> {
     }
 
     @Override
-    public void cleanup() {
+    public void close() {
         log.info("Running job is finished.");
     }
 

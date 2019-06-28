@@ -20,6 +20,11 @@ public class JobExecutor {
         final ExecutorService taskExecutorService = Executors.newFixedThreadPool(threadCount);
 
         final AtomicBoolean calculator = new AtomicBoolean(true);
+
+        //TODO: Clean this up!
+
+        // Open the generator before start the processing
+        job.getGenerator().open();
         while (calculator.get()) {
             try {
                 semaphore.acquire();
@@ -32,6 +37,8 @@ public class JobExecutor {
                 final Optional<?> generationResult = job.getGenerator().generate();
 
                 if (!generationResult.isPresent()) {
+                    job.getGenerator().close();
+
                     calculator.set(false);
                 }
 
@@ -72,7 +79,7 @@ public class JobExecutor {
         try {
             semaphore.acquire(threadCount);
 
-            job.getSink().cleanup();
+            job.getSink().close();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
