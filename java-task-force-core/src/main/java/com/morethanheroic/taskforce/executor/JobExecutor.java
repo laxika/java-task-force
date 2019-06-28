@@ -12,8 +12,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class JobExecutor {
 
     public void execute(final Job job) {
-        final Semaphore semaphore = new Semaphore(30);
-        final ExecutorService taskExecutorService = Executors.newFixedThreadPool(30);
+        execute(job, Runtime.getRuntime().availableProcessors());
+    }
+
+    public void execute(final Job job, final int threadCount) {
+        final Semaphore semaphore = new Semaphore(threadCount);
+        final ExecutorService taskExecutorService = Executors.newFixedThreadPool(threadCount);
 
         final AtomicBoolean calculator = new AtomicBoolean(true);
         while (calculator.get()) {
@@ -42,8 +46,6 @@ public class JobExecutor {
                             }
 
                             workItem = taskDescriptor.getTask().execute(workItem.get());
-
-                            //return taskDescriptor.getTask().execute(generationResult.get());
                         }
 
                         if (!workItem.isPresent()) {
@@ -63,14 +65,12 @@ public class JobExecutor {
                 // This catch is handling the generator's exceptions!
                 //TODO: I don't think we need this here!
                 e.printStackTrace();
-
-                continue;
             }
         }
 
         // Cleaning up the executor services.
         try {
-            semaphore.acquire(30);
+            semaphore.acquire(threadCount);
 
             job.getSink().cleanup();
         } catch (InterruptedException e) {

@@ -33,19 +33,17 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
      * @return this builder
      */
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final Task<NEXT_INPUT, OUTPUT> task) {
-        return task(UUID.randomUUID().toString(), task, TaskContext.builder().build());
+        return task(task, TaskContext.builder().build());
     }
 
     /**
-     * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task will be run with parallelism
-     * level 1 in it's own thread pool.
+     * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}.
      *
      * @param taskName the name of the task
      * @param task     the task to add
      * @param <OUTPUT> the result type of the added task
      * @return this builder
      */
-    @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final String taskName, final Task<NEXT_INPUT, OUTPUT> task) {
         return task(taskName, task, TaskContext.builder().build());
     }
@@ -59,7 +57,6 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
      * @param <OUTPUT>    the result type of the added task
      * @return this builder
      */
-    @SuppressWarnings("unchecked")
     public <OUTPUT> JobTaskPhaseBuilder<OUTPUT> task(final Task<NEXT_INPUT, OUTPUT> task,
             final TaskContext taskContext) {
         final String taskName = UUID.randomUUID().toString();

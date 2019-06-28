@@ -1,7 +1,6 @@
 package com.morethanheroic.taskforce.sample.warcparser;
 
 import com.morethanheroic.taskforce.executor.JobExecutor;
-import com.morethanheroic.taskforce.executor.pool.TaskExecutor;
 import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.job.builder.JobBuilder;
 import com.morethanheroic.taskforce.sample.warcparser.parser.domain.ContentType;
