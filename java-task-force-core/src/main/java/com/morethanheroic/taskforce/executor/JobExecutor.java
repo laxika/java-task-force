@@ -23,8 +23,8 @@ public class JobExecutor {
 
         //TODO: Clean this up!
 
-        // Open the generator before start the processing
-        job.getGenerator().open();
+        initializeJobProcessing(job);
+
         while (calculator.get()) {
             try {
                 semaphore.acquire();
@@ -76,6 +76,15 @@ public class JobExecutor {
         }
 
         // Cleaning up the executor services.
+        cleanupJobProcessing(job, threadCount, semaphore, taskExecutorService);
+    }
+
+    private void initializeJobProcessing(final Job job) {
+        job.getGenerator().open();
+    }
+
+    private void cleanupJobProcessing(final Job job, final int threadCount, final Semaphore semaphore,
+            final ExecutorService taskExecutorService) {
         try {
             semaphore.acquire(threadCount);
 
