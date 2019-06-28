@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -24,7 +23,6 @@ public class StatisticsDecoratorTask<INPUT, OUTPUT> implements Task<INPUT, OUTPU
     private final Task<INPUT, OUTPUT> delegate;
     private final boolean reportingEnabled;
     private final int reportingRate;
-    private final ThreadPoolExecutor threadPoolExecutor;
 
     //TODO: Move these out to the builder/task descriptor when we want to enable statistics gathering for a job.
     private final AtomicLong totalItemCount = new AtomicLong();
@@ -58,9 +56,8 @@ public class StatisticsDecoratorTask<INPUT, OUTPUT> implements Task<INPUT, OUTPU
             final long unsuccessfulCount = unsuccessfulItemCount.sum();
             final long totalInvocation = successfulCount + unsuccessfulCount;
 
-            log.info("The '{}' task ran {} times. Successful invocations: {} unsuccessful invocations: {}. Queue size " +
-                            "for the task: {}.", delegateName, totalInvocation, successfulCount, unsuccessfulCount,
-                    threadPoolExecutor.getQueue().size());
+            log.info("The '{}' task ran {} times. Successful invocations: {} unsuccessful invocations: {}.",
+                    delegateName, totalInvocation, successfulCount, unsuccessfulCount);
         }
     }
 }

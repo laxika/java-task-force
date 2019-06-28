@@ -17,8 +17,6 @@ public class AsyncTaskSample {
                                 .statisticsCollectionEnabled(true)
                                 .statisticsReportingEnabled(true)
                                 .statisticsReportingRate(5)
-                                .parallelismLevel(10)
-                                .maxQueueSize(10)
                                 .build()
                 )
                 .sink(new SampleSink())
