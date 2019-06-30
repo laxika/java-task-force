@@ -7,9 +7,17 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
 
+/**
+ * This class is responsible for the running of {@link Job} instances.
+ */
 @Slf4j
 public class JobExecutor {
 
+    /**
+     * Execute a job.
+     *
+     * @param job the job to execute
+     */
     public void execute(final Job job) {
         job.initialize();
 

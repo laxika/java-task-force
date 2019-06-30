@@ -20,12 +20,24 @@ public class JobFinalPhaseBuilder {
 
     private int threadCount;
 
+    /**
+     * The number of threads used to run the job in parallel. By default it's the amount of processor cores the host
+     * system has.
+     *
+     * @param threadCount the number of threads to run the job on
+     * @return this builder instance
+     */
     public JobFinalPhaseBuilder withThreadCount(final int threadCount) {
         this.threadCount = threadCount;
 
         return this;
     }
 
+    /**
+     * Build the job.
+     *
+     * @return the built job
+     */
     public Job build() {
         final TaskExecutor taskExecutor = newExecutor(threadCount);
         final JobContext jobContext = newContext();

@@ -8,6 +8,11 @@ import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
 
 import java.util.List;
 
+/**
+ * An unit of work that contains of a {@link Generator} that create the work entities, any number of
+ * {@link com.morethanheroic.taskforce.task.Task}s that process the generated items, and a {@link Sink} that
+ * consumes the end result of the processing.
+ */
 public abstract class Job {
 
     public abstract Generator<?> getGenerator();
