@@ -32,6 +32,7 @@ public class AsyncTaskSkipTest {
                 })
                 .task("task-two", Optional::of)
                 .sink((value) -> assertThat(value, is(5)))
+                .withThreadCount(3)
                 .build();
 
         final JobExecutor jobExecutor = new JobExecutor();

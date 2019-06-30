@@ -1,5 +1,7 @@
 package com.morethanheroic.taskforce.job;
 
+import com.morethanheroic.taskforce.executor.context.JobContext;
+import com.morethanheroic.taskforce.executor.task.TaskExecutor;
 import com.morethanheroic.taskforce.generator.Generator;
 import com.morethanheroic.taskforce.sink.Sink;
 import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
@@ -13,9 +15,11 @@ import java.util.List;
  */
 @Getter
 @RequiredArgsConstructor
-public class SimpleJob implements Job {
+public class SimpleJob extends Job {
 
     private final Generator generator;
     private final List<TaskDescriptor<?, ?>> taskDescriptors;
     private final Sink sink;
+    private final TaskExecutor taskExecutor;
+    private final JobContext jobContext;
 }

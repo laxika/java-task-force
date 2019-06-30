@@ -1,98 +1,41 @@
 package com.morethanheroic.taskforce.executor;
 
+import com.morethanheroic.taskforce.executor.context.JobContext;
+import com.morethanheroic.taskforce.executor.task.TaskExecutor;
 import com.morethanheroic.taskforce.job.Job;
-import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class JobExecutor {
 
     public void execute(final Job job) {
-        execute(job, Runtime.getRuntime().availableProcessors());
-    }
+        job.initialize();
 
-    public void execute(final Job job, final int threadCount) {
-        final Semaphore semaphore = new Semaphore(threadCount);
-        final ExecutorService taskExecutorService = Executors.newFixedThreadPool(threadCount);
-
-        final AtomicBoolean calculator = new AtomicBoolean(true);
-
-        //TODO: Clean this up!
-
-        initializeJobProcessing(job);
-
-        while (calculator.get()) {
+        while (!job.isFinished()) {
             try {
-                semaphore.acquire();
-            } catch (InterruptedException e) {
-                //TODO!
-                e.printStackTrace();
-            }
-
-            try {
-                final Optional<?> generationResult = job.getGenerator().generate();
-
-                if (!generationResult.isPresent()) {
-                    job.getGenerator().close();
-
-                    calculator.set(false);
-                }
-
-                taskExecutorService.submit(() -> {
-                    try {
-                        Optional<?> workItem = generationResult;
-
-                        for (TaskDescriptor taskDescriptor : job.getTaskDescriptors()) {
-                            //Skip empty working items
-                            if (!workItem.isPresent()) {
-                                return;
-                            }
-
-                            workItem = taskDescriptor.getTask().execute(workItem.get());
-                        }
-
-                        if (!workItem.isPresent()) {
-                            return;
-                        }
-
-                        job.getSink().consume(workItem.get());
-
-                    } catch (Exception e) {
-                        //TODO: I don't think we need this here!
-                        e.printStackTrace();
-                    } finally {
-                        semaphore.release();
-                    }
-                });
-            } catch (Exception e) {
-                // This catch is handling the generator's exceptions!
-                //TODO: I don't think we need this here!
-                e.printStackTrace();
+                processEntry(job);
+            } catch (final Exception e) {
+                throw new RuntimeException("Error while generating element!", e);
             }
         }
 
-        // Cleaning up the executor services.
-        cleanupJobProcessing(job, threadCount, semaphore, taskExecutorService);
+        job.cleanup();
     }
 
-    private void initializeJobProcessing(final Job job) {
-        job.getGenerator().open();
-    }
+    private void processEntry(final Job job) {
+        final TaskExecutor taskExecutor = job.getTaskExecutor();
+        final JobContext jobContext = job.getJobContext();
 
-    private void cleanupJobProcessing(final Job job, final int threadCount, final Semaphore semaphore,
-            final ExecutorService taskExecutorService) {
-        try {
-            semaphore.acquire(threadCount);
+        final Optional<?> generationResult = job.getGenerator().generate();
 
-            job.getSink().close();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            taskExecutorService.shutdown();
+        if (!generationResult.isPresent()) {
+            job.getGenerator().close();
+
+            jobContext.setLastItemReached();
+        } else {
+            taskExecutor.submitTasks(generationResult.get(), job.getTaskDescriptors(), job.getSink());
         }
     }
 }
