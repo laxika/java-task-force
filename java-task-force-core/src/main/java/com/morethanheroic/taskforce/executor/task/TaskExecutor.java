@@ -2,6 +2,7 @@ package com.morethanheroic.taskforce.executor.task;
 
 import com.morethanheroic.taskforce.sink.Sink;
 import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,7 @@ import java.util.concurrent.Semaphore;
 /**
  * This class is responsible for running the tasks available in a {@link com.morethanheroic.taskforce.job.Job}.
  */
+@Slf4j
 public class TaskExecutor {
 
     private final Semaphore semaphore;
@@ -47,10 +49,8 @@ public class TaskExecutor {
                 }
 
                 sink.consume(workItem.get());
-
-            } catch (Exception e) {
-                //TODO: I don't think we need this here!
-                e.printStackTrace();
+            } catch (final Exception e) {
+                log.warn("Error while processing tasks!", e);
             } finally {
                 releaseWorkingSlot();
             }
@@ -64,18 +64,16 @@ public class TaskExecutor {
     public void waitUntilFinished() {
         try {
             semaphore.acquire(threadCount);
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (final InterruptedException e) {
+            throw new RuntimeException("Unable to wait until all tasks are finished!", e);
         }
     }
 
     private void acquireWorkingSlot() {
         try {
             semaphore.acquire();
-        } catch (InterruptedException e) {
-            //TODO!
-            e.printStackTrace();
+        } catch (final InterruptedException e) {
+            throw new RuntimeException("Unable to acquire working slot!");
         }
     }
 
