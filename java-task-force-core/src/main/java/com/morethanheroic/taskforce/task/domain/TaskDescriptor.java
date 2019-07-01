@@ -15,7 +15,7 @@ import lombok.Getter;
 public class TaskDescriptor<INPUT, OUTPUT> {
 
     /**
-     * the task that we are wrapping into this descriptor.
+     * The task that we are wrapping into this descriptor.
      */
     private final Task<INPUT, OUTPUT> task;
 

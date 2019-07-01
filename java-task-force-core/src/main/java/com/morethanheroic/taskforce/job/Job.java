@@ -15,10 +15,25 @@ import java.util.List;
  */
 public abstract class Job {
 
+    /**
+     * The generator used to create new entities for processing.
+     *
+     * @return the generator for the job
+     */
     public abstract Generator<?> getGenerator();
 
+    /**
+     * The sink used to consume the result entities of this job.
+     *
+     * @return the sink for the job
+     */
     public abstract Sink<?> getSink();
 
+    /**
+     * The tasks that should be run between the {@link Generator} and the {@link Sink} in the job.
+     *
+     * @return the tasks for the job
+     */
     public abstract List<TaskDescriptor<?, ?>> getTaskDescriptors();
 
     public abstract TaskExecutor getTaskExecutor();
