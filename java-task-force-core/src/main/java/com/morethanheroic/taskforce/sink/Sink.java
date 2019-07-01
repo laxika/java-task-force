@@ -18,6 +18,13 @@ public interface Sink<INPUT> {
     void consume(INPUT input);
 
     /**
+     * This method is called before the first element is created by the generator. The control is not going to
+     * be returned to the executor of the job until this method is successfully finish the execution.
+     */
+    default void open() {
+    }
+
+    /**
      * This method is called after the last element is successfully processed by the job. The control is not going to
      * be returned to the executor of the job until this method is successfully finish the execution.
      */

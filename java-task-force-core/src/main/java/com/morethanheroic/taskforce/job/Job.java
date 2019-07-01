@@ -36,22 +36,45 @@ public abstract class Job {
      */
     public abstract List<TaskDescriptor<?, ?>> getTaskDescriptors();
 
+    /**
+     * The executor used to run the tasks and the sink.
+     *
+     * @return the executor for the job
+     */
     public abstract TaskExecutor getTaskExecutor();
 
+    /**
+     * The context used for the job. Contains status information etc.
+     *
+     * @return the context for the job
+     */
     public abstract JobContext getJobContext();
 
+    /**
+     * Returns true if the job is finished.
+     *
+     * @return true if the job is finished
+     */
     public boolean isFinished() {
         return getJobContext().isLastItemReached();
     }
 
+    /**
+     * Initialize the job before processing. Should be invoked before any processing happening.
+     */
     public void initialize() {
         getGenerator().open();
+        getSink().open();
     }
 
+    /**
+     * Cleanup the job after processing. Should be invoked after any processing happening.
+     */
     public void cleanup() {
         getTaskExecutor().waitUntilFinished();
         getTaskExecutor().shutdown();
 
+        getGenerator().close();
         getSink().close();
     }
 }

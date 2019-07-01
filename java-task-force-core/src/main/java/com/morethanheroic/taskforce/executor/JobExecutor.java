@@ -39,8 +39,6 @@ public class JobExecutor {
         final Optional<?> generationResult = job.getGenerator().generate();
 
         if (!generationResult.isPresent()) {
-            job.getGenerator().close();
-
             jobContext.setLastItemReached();
         } else {
             taskExecutor.submitTasks(generationResult.get(), job.getTaskDescriptors(), job.getSink());

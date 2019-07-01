@@ -17,6 +17,10 @@ public interface Generator<RESULT> {
      */
     Optional<RESULT> generate();
 
+    /**
+     * This method is called before the first element is created by the generator. The control is not going to
+     * be returned to the executor of the job until this method is successfully finish the execution.
+     */
     default void open() {
     }
 

@@ -17,6 +17,5 @@ public class DiscardingSink<INPUT> implements Sink<INPUT> {
 
     @Override
     public void consume(INPUT input) {
-
     }
 }
