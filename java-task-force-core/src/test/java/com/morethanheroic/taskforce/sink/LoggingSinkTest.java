@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.*;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({LoggingSink.class, LoggerFactory.class})
+@PrepareForTest(LoggerFactory.class)
 public class LoggingSinkTest {
 
     private static final String TEST_FORMAT = "format";
