@@ -2,13 +2,15 @@ package com.morethanheroic.taskforce.sink;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
-@Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class LoggingSink<INPUT> implements Sink<INPUT> {
+
+    private final Logger log = LoggerFactory.getLogger(LoggingSink.class);
 
     private final String format;
     private final boolean logEmpty;
