@@ -1,6 +1,7 @@
 package com.morethanheroic.taskforce.task.decorator;
 
 import com.morethanheroic.taskforce.task.Task;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,9 +20,16 @@ import java.util.concurrent.atomic.LongAdder;
 @RequiredArgsConstructor
 public class StatisticsDecoratorTask<INPUT, OUTPUT> implements Task<INPUT, OUTPUT> {
 
+    @Getter
     private final String delegateName;
+
+    @Getter
     private final Task<INPUT, OUTPUT> delegate;
+
+    @Getter
     private final boolean reportingEnabled;
+
+    @Getter
     private final int reportingRate;
 
     //TODO: Move these out to the builder/task descriptor when we want to enable statistics gathering for a job.

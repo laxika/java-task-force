@@ -23,7 +23,6 @@ public class JobTaskPhaseBuilder<NEXT_INPUT> {
     private final GeneratorStageJobContext jobContext;
     private final List<TaskDescriptor<?, ?>> taskDescriptors = new ArrayList<>();
 
-
     /**
      * Adds a {@link Task} to the {@link com.morethanheroic.taskforce.job.Job}. The task's name will be an unique
      * randomly generated Id ({@link UUID}).
