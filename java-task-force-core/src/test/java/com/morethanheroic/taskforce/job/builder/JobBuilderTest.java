@@ -86,4 +86,77 @@ public class JobBuilderTest {
         assertThat(job.getTaskDescriptors().get(0).getTaskName().length(), is(DEFAULT_UUID_LENGTH));
         assertThat(job.getSink(), is(mockSink));
     }
+
+    @Test
+    public void testBuilderWithNoNameAndStatisticsCollectionAndReportingEnabled() {
+        final Generator<Integer> mockGenerator = mock(Generator.class);
+        final Task<Integer, Integer> mockTask = mock(Task.class);
+        final Sink<Integer> mockSink = mock(Sink.class);
+        final TaskContext taskContext = TaskContext.builder()
+                .statisticsCollectionEnabled(true)
+                .statisticsReportingEnabled(true)
+                .build();
+
+        final Job job = JobBuilder.newBuilder()
+                .generator(mockGenerator)
+                .task(mockTask, taskContext)
+                .sink(mockSink)
+                .build();
+
+        assertThat(job.getGenerator(), is(mockGenerator));
+        assertThat(job.getTaskDescriptors().size(), is(1));
+        assertThat(job.getTaskDescriptors().get(0).getTask(), is(instanceOf(StatisticsDecoratorTask.class)));
+        final StatisticsDecoratorTask statisticsDecoratorTask = (StatisticsDecoratorTask) job.getTaskDescriptors()
+                .get(0).getTask();
+        assertThat(statisticsDecoratorTask.getDelegate(), is(mockTask));
+        assertThat(statisticsDecoratorTask.getReportingRate(), is(DEFAULT_STATISTICS_REPORTING_RATE));
+        assertThat(statisticsDecoratorTask.getDelegateName().length(), is(DEFAULT_UUID_LENGTH));
+        assertThat(statisticsDecoratorTask.isReportingEnabled(), is(true));
+        assertThat(job.getTaskDescriptors().get(0).getTaskName().length(), is(DEFAULT_UUID_LENGTH));
+        assertThat(job.getSink(), is(mockSink));
+    }
+
+    @Test
+    public void testBuilderWithNoNameAndOnlyReportingEnabled() {
+        final Generator<Integer> mockGenerator = mock(Generator.class);
+        final Task<Integer, Integer> mockTask = mock(Task.class);
+        final Sink<Integer> mockSink = mock(Sink.class);
+        final TaskContext taskContext = TaskContext.builder()
+                .statisticsReportingEnabled(true)
+                .build();
+
+        final Job job = JobBuilder.newBuilder()
+                .generator(mockGenerator)
+                .task(mockTask, taskContext)
+                .sink(mockSink)
+                .build();
+
+        assertThat(job.getGenerator(), is(mockGenerator));
+        assertThat(job.getTaskDescriptors().size(), is(1));
+        assertThat(job.getTaskDescriptors().get(0).getTask(), is(instanceOf(StatisticsDecoratorTask.class)));
+        final StatisticsDecoratorTask statisticsDecoratorTask = (StatisticsDecoratorTask) job.getTaskDescriptors()
+                .get(0).getTask();
+        assertThat(statisticsDecoratorTask.getDelegate(), is(mockTask));
+        assertThat(statisticsDecoratorTask.getReportingRate(), is(DEFAULT_STATISTICS_REPORTING_RATE));
+        assertThat(statisticsDecoratorTask.getDelegateName().length(), is(DEFAULT_UUID_LENGTH));
+        assertThat(statisticsDecoratorTask.isReportingEnabled(), is(true));
+        assertThat(job.getTaskDescriptors().get(0).getTaskName().length(), is(DEFAULT_UUID_LENGTH));
+        assertThat(job.getSink(), is(mockSink));
+    }
+
+    @Test
+    public void testBuilderWithCustomThreadCount() {
+        final Generator<Integer> mockGenerator = mock(Generator.class);
+        final Task<Integer, Integer> mockTask = mock(Task.class);
+        final Sink<Integer> mockSink = mock(Sink.class);
+
+        final Job job = JobBuilder.newBuilder()
+                .generator(mockGenerator)
+                .task(mockTask)
+                .sink(mockSink)
+                .withThreadCount(120)
+                .build();
+
+        assertThat(job.getTaskExecutor().getThreadCount(), is(120));
+    }
 }

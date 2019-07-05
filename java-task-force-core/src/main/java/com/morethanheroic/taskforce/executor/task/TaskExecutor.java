@@ -2,6 +2,7 @@ package com.morethanheroic.taskforce.executor.task;
 
 import com.morethanheroic.taskforce.sink.Sink;
 import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -18,6 +19,8 @@ public class TaskExecutor {
 
     private final Semaphore semaphore;
     private final ExecutorService taskExecutorService;
+
+    @Getter
     private final int threadCount;
 
     private TaskExecutor(final int threadCount) {
