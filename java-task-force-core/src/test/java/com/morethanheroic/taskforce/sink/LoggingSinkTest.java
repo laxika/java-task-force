@@ -87,6 +87,15 @@ public class LoggingSinkTest {
     }
 
     @Test
+    public void testConsumeWhenMessageNotEmptyCollectionAndLogEmptyDisabled() {
+        final LoggingSink<List<?>> loggingSink = LoggingSink.of(TEST_FORMAT, false);
+
+        loggingSink.consume(Collections.singletonList(TEST_LOG_MESSAGE));
+
+        verify(logger).info(TEST_FORMAT, Collections.singletonList(TEST_LOG_MESSAGE));
+    }
+
+    @Test
     public void testConsumeWhenMessageNullAndLogEmptyDisabled() {
         final LoggingSink<String> loggingSink = LoggingSink.of(TEST_FORMAT, false);
         final String testNull = null;
@@ -94,5 +103,14 @@ public class LoggingSinkTest {
         loggingSink.consume(testNull);
 
         verify(logger, never()).info(TEST_FORMAT, testNull);
+    }
+
+    @Test
+    public void testConsumeWhenMessageEmptyAndLogEmptyDisabled() {
+        final LoggingSink<String> loggingSink = LoggingSink.of(TEST_FORMAT, false);
+
+        loggingSink.consume(TEST_LOG_MESSAGE);
+
+        verify(logger).info(TEST_FORMAT, TEST_LOG_MESSAGE);
     }
 }

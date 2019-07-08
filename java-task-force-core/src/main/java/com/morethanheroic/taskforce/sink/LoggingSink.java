@@ -32,11 +32,6 @@ public class LoggingSink<INPUT> implements Sink<INPUT> {
         log.info(format, input);
     }
 
-    @Override
-    public void close() {
-        log.info("Running job is finished.");
-    }
-
     private boolean isEmptyInput(final INPUT input) {
         return input == null || isEmptyCollection(input) || isEmptyString(input);
     }
