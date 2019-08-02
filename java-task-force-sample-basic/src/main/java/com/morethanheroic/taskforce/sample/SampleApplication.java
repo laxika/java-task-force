@@ -1,18 +1,21 @@
-package com.morethanheroic.taskforce.sample.jobbuilder;
+package com.morethanheroic.taskforce.sample;
 
+import com.morethanheroic.taskforce.executor.JobExecutor;
 import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.job.builder.JobBuilder;
 import com.morethanheroic.taskforce.sample.domain.SampleGenerator;
 import com.morethanheroic.taskforce.sample.domain.SampleSink;
+import com.morethanheroic.taskforce.sample.domain.SampleTask;
 import com.morethanheroic.taskforce.sample.domain.SlowSampleTask;
 import com.morethanheroic.taskforce.task.domain.TaskContext;
 
-public class AsyncTaskSample {
+public class SampleApplication {
 
-    public Job buildJob() {
-        return JobBuilder.newBuilder()
+    public static void main(final String... args) {
+        final Job job = JobBuilder.newBuilder()
                 .generator(new SampleGenerator())
-                .task("Test Task", new SlowSampleTask(),
+                .task("task-one", new SampleTask())
+                .task("task-two", new SlowSampleTask(),
                         TaskContext.builder()
                                 .statisticsCollectionEnabled(true)
                                 .statisticsReportingEnabled(true)
@@ -21,5 +24,8 @@ public class AsyncTaskSample {
                 )
                 .sink(new SampleSink())
                 .build();
+
+        final JobExecutor jobExecutor = new JobExecutor();
+        jobExecutor.execute(job);
     }
 }

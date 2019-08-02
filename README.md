@@ -2,7 +2,7 @@
 
 **Java Task Force (JTF)** is a minimalistic batch framework that aims to radically simplify the writing and running of single-instance batch processing applications.
 
-## Building blocks
+## Domain Language
 
 JTF encourages the developers to build lightweight and reusable components.
 
