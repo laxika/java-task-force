@@ -4,8 +4,6 @@
 
 ## Domain Language
 
-JTF encourages the developers to build lightweight and reusable components.
-
 ### Job
 
 Jobs are the unit of work for JTF. It is a simple processing pipeline. A job contains exactly one **generator**, exactly one **sink** and any number of **tasks** in-between. A job is responsible for the processing of **work items**.
