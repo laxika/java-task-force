@@ -6,6 +6,7 @@ package com.morethanheroic.taskforce.sink;
  *
  * @param <INPUT> the type of the handled element
  */
+@FunctionalInterface
 public interface Sink<INPUT> {
 
     /**

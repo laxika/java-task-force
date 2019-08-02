@@ -5,6 +5,7 @@ import java.util.Optional;
 /**
  * The generator is responsible for providing entries to process to the {@link com.morethanheroic.taskforce.task.Task}s.
  */
+@FunctionalInterface
 public interface Generator<RESULT> {
 
     /**

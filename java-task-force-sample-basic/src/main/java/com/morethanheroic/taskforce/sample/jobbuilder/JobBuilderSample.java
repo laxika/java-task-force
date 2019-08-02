@@ -12,7 +12,7 @@ public class JobBuilderSample {
         return JobBuilder.newBuilder()
                 .generator(new SampleGenerator())
                 .task("First Task", new SampleTask())
-                .task("Test Task",new SampleTask())
+                .task("Test Task", new SampleTask())
                 .sink(new SampleSink())
                 .build();
     }
