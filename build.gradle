@@ -22,6 +22,38 @@ subprojects {
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
 
+    configure(install.repositories.mavenInstaller) {
+        pom.project {
+            inceptionYear '2019'
+            name project.name
+            packaging 'jar'
+            description project.description
+
+            url 'https://github.com/laxika/java-task-force'
+
+            scm {
+                connection 'git@github.com:laxika/java-task-force.git'
+                developerConnection 'git@github.com:laxika/java-task-force.git'
+                url 'https://github.com/laxika/java-task-force'
+            }
+
+            licenses {
+                license {
+                    name 'MIT License'
+                    url 'http://www.opensource.org/licenses/mit-license.php'
+                }
+            }
+
+            developers {
+                developer {
+                    id 'gyulalakatos'
+                    name 'Gyula Lakatos'
+                    email 'laxika91@gmail.com'
+                }
+            }
+        }
+    }
+
     task sourcesJar(type: Jar) {
         from sourceSets.main.allJava
         classifier 'sources'
@@ -50,9 +82,4 @@ subprojects {
         testCompile group: 'junit', name: 'junit', version: '4.12'
         testCompile group: 'org.mockito', name: 'mockito-core', version: '2.18.3'
     }
-}
-
-allprojects {
-    group 'com.morethanheroic'
-    version '1.0.0'
 }
