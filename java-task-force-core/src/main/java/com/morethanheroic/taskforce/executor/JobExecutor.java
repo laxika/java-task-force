@@ -6,6 +6,9 @@ import com.morethanheroic.taskforce.job.Job;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * This class is responsible for the running of {@link Job} instances.
@@ -14,7 +17,7 @@ import java.util.Optional;
 public class JobExecutor {
 
     /**
-     * Execute a job.
+     * Execute a job. The invoking thread will be blocked until the job execution is finished.
      *
      * @param job the job to execute
      */
@@ -30,6 +33,18 @@ public class JobExecutor {
         }
 
         job.cleanup();
+    }
+
+    /**
+     * Execute a job in an asynchronous way. The running of the task will be done in a background thread.
+     *
+     * @param job the job to execute
+     * @return the future that represents the result of an asynchronous computation
+     */
+    public Future<?> executeAsync(final Job job) {
+        final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        return executorService.submit(() -> execute(job));
     }
 
     private void processEntry(final Job job) {
