@@ -1,4 +1,4 @@
-package com.morethanheroic.taskforce.sample.jobbuilder;
+package com.morethanheroic.taskforce.integration;
 
 import com.morethanheroic.taskforce.executor.JobExecutor;
 import com.morethanheroic.taskforce.generator.StreamGenerator;
@@ -17,7 +17,7 @@ import static org.hamcrest.core.Is.is;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.class)
-public class AsyncTaskSkipTest {
+public class JobExecutionIntegrationTest {
 
     @Test
     public void integrationTestForSkipTest() {

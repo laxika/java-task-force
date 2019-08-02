@@ -1,5 +1,6 @@
 package com.morethanheroic.taskforce.executor.task;
 
+import com.morethanheroic.taskforce.executor.item.WorkItemProcessor;
 import com.morethanheroic.taskforce.sink.Sink;
 import com.morethanheroic.taskforce.task.domain.TaskDescriptor;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class TaskExecutor {
 
     private final Semaphore semaphore;
     private final ExecutorService taskExecutorService;
+    private final WorkItemProcessor workItemProcessor;
 
     @Getter
     private final int threadCount;
@@ -28,36 +30,13 @@ public class TaskExecutor {
 
         semaphore = new Semaphore(threadCount);
         taskExecutorService = Executors.newFixedThreadPool(threadCount);
+        workItemProcessor = new WorkItemProcessor();
     }
 
-    @SuppressWarnings("unchecked") // The type checking is done in the builders
-    public void submitTasks(final Object rawWorkItem, final List<TaskDescriptor<?, ?>> taskDescriptors, final Sink sink) {
+    public void submitTasks(final Object rawWorkItem, final List<TaskDescriptor<?, ?>> taskDescriptors, final Sink<?> sink) {
         acquireWorkingSlot();
 
-        taskExecutorService.submit(() -> {
-            Optional<?> workItem = Optional.of(rawWorkItem);
-
-            try {
-                for (TaskDescriptor taskDescriptor : taskDescriptors) {
-                    //Skip empty working items
-                    if (!workItem.isPresent()) {
-                        return;
-                    }
-
-                    workItem = taskDescriptor.getTask().execute(workItem.get());
-                }
-
-                if (!workItem.isPresent()) {
-                    return;
-                }
-
-                sink.consume(workItem.get());
-            } catch (final Exception e) {
-                log.warn("Error while processing tasks!", e);
-            } finally {
-                releaseWorkingSlot();
-            }
-        });
+        taskExecutorService.submit(() -> processWorkItem(rawWorkItem, taskDescriptors, sink));
     }
 
     public void shutdown() {
@@ -69,6 +48,17 @@ public class TaskExecutor {
             semaphore.acquire(threadCount);
         } catch (final InterruptedException e) {
             throw new RuntimeException("Unable to wait until all tasks are finished!", e);
+        }
+    }
+
+    private void processWorkItem(final Object rawWorkItem, final List<TaskDescriptor<?, ?>> taskDescriptors,
+            final Sink<?> sink) {
+        try {
+            workItemProcessor.processWorkItem(rawWorkItem, taskDescriptors, sink);
+        } catch (final Exception e) {
+            log.warn("Error while processing tasks!", e);
+        } finally {
+            releaseWorkingSlot();
         }
     }
 
