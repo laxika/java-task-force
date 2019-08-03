@@ -103,26 +103,43 @@ DiscardingSink.of(streamOfItems);
 
 The job executor is responsible to run a job.
 
+```
+final JobExecutor jobExecutor = new JobExecutor();
+jobExecutor.execute(job);
+```
+
 ## Example
 
 An fully working basic example is available in the `java-task-force-sample` project. A much more interesting but complicated example is available in the `java-task-force-sample-warcparser`.
 
 ```
+import com.morethanheroic.taskforce.executor.JobExecutor;
 import com.morethanheroic.taskforce.job.Job;
 import com.morethanheroic.taskforce.job.builder.JobBuilder;
 import com.morethanheroic.taskforce.sample.domain.SampleGenerator;
 import com.morethanheroic.taskforce.sample.domain.SampleSink;
 import com.morethanheroic.taskforce.sample.domain.SampleTask;
+import com.morethanheroic.taskforce.sample.domain.SlowSampleTask;
+import com.morethanheroic.taskforce.task.domain.TaskContext;
 
-public class JobBuilderSample {
+public class SampleApplication {
 
-    public Job buildJob() {
-        return JobBuilder.newBuilder()
+    public static void main(final String... args) {
+        final Job job = JobBuilder.newBuilder()
                 .generator(new SampleGenerator())
-                .task("First Task", new SampleTask())
-                .task("Test Task", new SampleTask())
+                .task("task-one", new SampleTask())
+                .task("task-two", new SlowSampleTask(),
+                        TaskContext.builder()
+                                .statisticsCollectionEnabled(true)
+                                .statisticsReportingEnabled(true)
+                                .statisticsReportingRate(5)
+                                .build()
+                )
                 .sink(new SampleSink())
                 .build();
+
+        final JobExecutor jobExecutor = new JobExecutor();
+        jobExecutor.execute(job);
     }
 }
 ```
