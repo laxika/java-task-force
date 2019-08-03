@@ -113,6 +113,7 @@ jobExecutor.execute(job);
 
 An fully working basic example is available in the `java-task-force-sample` project. A much more interesting but complicated example is available in the `java-task-force-sample-warcparser`.
 
+For example:
 ```
 import com.morethanheroic.taskforce.executor.JobExecutor;
 import com.morethanheroic.taskforce.job.Job;
