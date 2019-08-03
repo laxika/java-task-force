@@ -26,6 +26,7 @@ public class JobBuilder {
      * Returns a {@link JobTaskPhaseBuilder} to ban the addition of other creators.
      *
      * @param generator the generator to add to the job
+     * @param <RESULT> the return type of the generator
      * @return the second phase of the building of a job
      */
     public <RESULT> JobTaskPhaseBuilder<RESULT> generator(final Generator<RESULT> generator) {

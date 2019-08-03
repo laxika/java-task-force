@@ -20,35 +20,54 @@ subprojects {
     }
 
     apply plugin: 'maven'
+
+    apply plugin: 'signing'
+    signing {
+        sign configurations.archives
+    }
+
     apply plugin: 'maven-publish'
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-    configure(install.repositories.mavenInstaller) {
-        pom.project {
-            inceptionYear '2019'
-            name project.name
-            packaging 'jar'
-            description project.description
-
-            url 'https://github.com/laxika/java-task-force'
-
-            scm {
-                connection 'git@github.com:laxika/java-task-force.git'
-                developerConnection 'git@github.com:laxika/java-task-force.git'
-                url 'https://github.com/laxika/java-task-force'
-            }
-
-            licenses {
-                license {
-                    name 'MIT License'
-                    url 'http://www.opensource.org/licenses/mit-license.php'
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
                 }
-            }
 
-            developers {
-                developer {
-                    id 'gyulalakatos'
-                    name 'Gyula Lakatos'
-                    email 'laxika91@gmail.com'
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                pom.project {
+                    inceptionYear '2019'
+                    name project.name
+                    packaging 'jar'
+                    description project.description
+
+                    url 'https://github.com/laxika/java-task-force'
+
+                    scm {
+                        connection 'git@github.com:laxika/java-task-force.git'
+                        developerConnection 'git@github.com:laxika/java-task-force.git'
+                        url 'https://github.com/laxika/java-task-force'
+                    }
+
+                    licenses {
+                        license {
+                            name 'MIT License'
+                            url 'http://www.opensource.org/licenses/mit-license.php'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'gyulalakatos'
+                            name 'Gyula Lakatos'
+                            email 'laxika91@gmail.com'
+                        }
+                    }
                 }
             }
         }
@@ -62,6 +81,10 @@ subprojects {
     task javadocJar(type: Jar) {
         from javadoc
         classifier 'javadoc'
+    }
+
+    artifacts {
+        archives javadocJar, sourcesJar
     }
 
     sourceCompatibility = 1.8
