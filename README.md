@@ -103,6 +103,7 @@ DiscardingSink.of(streamOfItems);
 
 The job executor is responsible to run a job.
 
+For example:
 ```
 final JobExecutor jobExecutor = new JobExecutor();
 jobExecutor.execute(job);
