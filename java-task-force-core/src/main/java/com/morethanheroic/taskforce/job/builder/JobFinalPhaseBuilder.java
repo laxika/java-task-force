@@ -33,6 +33,17 @@ public class JobFinalPhaseBuilder {
         return this;
     }
 
+
+    /**
+     * Run the job with single thread
+     *
+     * @return this builder instance
+     */    
+    public JobFinalPhaseBuilder withSingleThread(){
+    	return this.withThreadCount(1);
+    }
+
+
     /**
      * Build the job.
      *
