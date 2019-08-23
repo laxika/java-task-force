@@ -16,6 +16,8 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class JobFinalPhaseBuilder {
 
+    private static final int DEFAULT_THREAD_COUNT = 0;
+
     private final TaskStageJobContext taskStageJobContext;
 
     private int threadCount;
@@ -28,8 +30,10 @@ public class JobFinalPhaseBuilder {
      * @return this builder instance
      */
     public JobFinalPhaseBuilder withThreadCount(final int threadCount) {
-    	if(threadCount < 0 )
-    		throw new IllegalArgumentException("threadCount cannot be negative");
+        if (threadCount < 0) {
+            throw new IllegalArgumentException("The threadCount should not be negative!");
+        }
+
         this.threadCount = threadCount;
 
         return this;
@@ -40,9 +44,9 @@ public class JobFinalPhaseBuilder {
      * Run the job with single thread
      *
      * @return this builder instance
-     */    
-    public JobFinalPhaseBuilder withSingleThread(){
-    	return this.withThreadCount(1);
+     */
+    public JobFinalPhaseBuilder withSingleThread() {
+        return withThreadCount(1);
     }
 
 
@@ -55,12 +59,12 @@ public class JobFinalPhaseBuilder {
         final TaskExecutor taskExecutor = newExecutor(threadCount);
         final JobContext jobContext = newContext();
 
-        return new SimpleJob(taskStageJobContext.getGenerator(), Collections.unmodifiableList(taskStageJobContext.getTaskDescriptors()),
-                taskStageJobContext.getSink(), taskExecutor, jobContext);
+        return new SimpleJob(taskStageJobContext.getGenerator(), Collections.unmodifiableList(
+                taskStageJobContext.getTaskDescriptors()), taskStageJobContext.getSink(), taskExecutor, jobContext);
     }
 
     private TaskExecutor newExecutor(final int threadCount) {
-        if (threadCount == 0) {
+        if (threadCount == DEFAULT_THREAD_COUNT) {
             return TaskExecutor.builder()
                     .threadCount(Runtime.getRuntime().availableProcessors())
                     .build();
