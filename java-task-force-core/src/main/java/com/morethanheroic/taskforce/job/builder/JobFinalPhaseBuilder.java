@@ -28,10 +28,23 @@ public class JobFinalPhaseBuilder {
      * @return this builder instance
      */
     public JobFinalPhaseBuilder withThreadCount(final int threadCount) {
+    	if(threadCount < 0 )
+    		throw new IllegalArgumentException("threadCount cannot be negative");
         this.threadCount = threadCount;
 
         return this;
     }
+
+
+    /**
+     * Run the job with single thread
+     *
+     * @return this builder instance
+     */    
+    public JobFinalPhaseBuilder withSingleThread(){
+    	return this.withThreadCount(1);
+    }
+
 
     /**
      * Build the job.
